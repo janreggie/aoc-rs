@@ -35,10 +35,10 @@ impl Instruction {
     }
 }
 
-pub fn d02(lines: &Vec<String>) -> Result<(String, String), String> {
+pub fn d02(lines: Vec<String>) -> Result<(String, String), String> {
     let mut instrs = Vec::new();
     for line in lines {
-        let instr = Instruction::new(line);
+        let instr = Instruction::new(&line);
         match instr {
             Ok(instr) => instrs.push(instr),
             Err(e) => {

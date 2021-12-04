@@ -140,8 +140,8 @@ impl Report {
     }
 }
 
-pub fn d03(lines: &Vec<String>) -> Result<(String, String), String> {
-    let report = Report::new(lines);
+pub fn d03(lines: Vec<String>) -> Result<(String, String), String> {
+    let report = Report::new(&lines);
     if let Err(e) = report {
         return Err(format!("could not read input data: {}", e));
     }

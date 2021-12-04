@@ -46,7 +46,7 @@ fn main() {
 
     // Do the needful
     let before = Instant::now();
-    let result = solver(&lines);
+    let result = solver(lines);
     let result = result.unwrap_or_else(|err| panic!("could not solve y{}-d{}: {}", year, day, err));
     let after = Instant::now();
 
