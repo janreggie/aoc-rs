@@ -2,7 +2,7 @@ use std::any;
 use std::fmt;
 use std::str::FromStr;
 
-pub fn from_strs<T>(strs: Vec<String>) -> Result<Vec<T>, String>
+pub fn from_strs<T>(strs: &Vec<String>) -> Result<Vec<T>, String>
 where
     T: FromStr,
     <T as FromStr>::Err: fmt::Debug,
@@ -20,6 +20,22 @@ where
         result.push(item.unwrap());
     }
     Ok(result)
+}
+
+/// Splits str into chunks by delim.
+/// Multiple delim's between values (e.g., spaces) will be removed.
+/// Example:
+///
+///     split_and_trim(" a b  c  d   ") -> ["a","b","c","d"]
+///
+pub fn split_and_trim(str: &str, delim: char) -> Vec<String>
+where
+{
+    str.trim_matches(delim)
+        .split(delim)
+        .filter(|s| !s.is_empty())
+        .map(|s| s.to_string())
+        .collect()
 }
 
 /// Groups together strings which aren't empty.

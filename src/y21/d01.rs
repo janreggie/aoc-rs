@@ -1,7 +1,7 @@
 use crate::util::vectors;
 
 pub fn d01(lines: Vec<String>) -> Result<(String, String), String> {
-    let nums = vectors::from_strs::<u32>(lines);
+    let nums = vectors::from_strs::<u32>(&lines);
     if let Err(e) = nums {
         return Err(format!("could not convert all input into nums {}", e));
     }

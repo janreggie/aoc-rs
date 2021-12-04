@@ -1,3 +1,5 @@
+use crate::util::vectors;
+
 /// A submarine instruction.
 enum Instruction {
     Forward(u32),
@@ -8,7 +10,7 @@ enum Instruction {
 impl Instruction {
     /// Create insturction from line such as `forward 5` or `down 4`
     fn new(line: &str) -> Result<Instruction, String> {
-        let split: Vec<&str> = line.split(' ').collect();
+        let split = vectors::split_and_trim(line, ' ');
         if split.len() != 2 {
             return Err(format!(
                 "expected line to be split into two parts, got {}",
@@ -16,14 +18,13 @@ impl Instruction {
             ));
         }
 
-        let count = split[1];
-        let count: Result<u32, _> = count.parse();
+        let count: Result<u32, _> = split[1].parse();
         if let Err(_) = count {
             return Err(format!("could not format count `{}` as u32", split[1]));
         }
         let count = count.unwrap();
 
-        match split[0] {
+        match split[0].as_str() {
             "forward" => Ok(Instruction::Forward(count)),
             "down" => Ok(Instruction::Down(count)),
             "up" => Ok(Instruction::Up(count)),
