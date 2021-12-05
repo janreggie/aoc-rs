@@ -12,20 +12,20 @@ fn main() {
         .author("Jan Reggie Dela Cruz")
         .about("Advent of Code in Rust")
         .arg(
-            Arg::new("year")
-                .short('y')
+            Arg::with_name("year")
+                .short("y")
                 .long("year")
                 .takes_value(true)
                 .value_name("yr")
-                .about("Year to use (e.g., `21`)"),
+                .help("Year to use (e.g., `21`)"),
         )
         .arg(
-            Arg::new("day")
-                .short('d')
+            Arg::with_name("day")
+                .short("d")
                 .long("day")
                 .takes_value(true)
                 .value_name("d")
-                .about("Day to use (e.g., `5`)"),
+                .help("Day to use (e.g., `5`)"),
         )
         .get_matches();
     let year: u8 = matches

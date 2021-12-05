@@ -165,7 +165,6 @@ pub fn d05(lines: Vec<String>) -> Result<(String, String), String> {
     }
     let lines = ls;
     let mut grid = Grid::new();
-    dbg!("the grid should be created");
 
     // Part 1: Draw all points parallel to x- or y- axis.
     for line in &lines {
