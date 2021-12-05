@@ -1,3 +1,4 @@
+use anyhow::{bail, Context, Result};
 use num;
 use num::Integer;
 use std::fmt;
@@ -9,28 +10,24 @@ struct Point(usize, usize);
 
 impl Point {
     /// new("816,14") -> Point(816,14)
-    fn new(input: &str) -> Result<Point, String> {
+    fn new(input: &str) -> Result<Point> {
         let split: Vec<&str> = input.split(',').collect();
         if split.len() != 2 {
-            return Err(String::from("could not split by commas"));
+            bail!("could not split by commas");
         }
 
-        let c1 = split[0].parse::<usize>();
-        if let Err(_) = c1 {
-            return Err(format!("could not parse {} as usize", split[0]));
-        }
-        let c1 = c1.unwrap();
+        let c1 = split[0]
+            .parse()
+            .context(format!("could not parse {} as usize", split[0]))?;
         if c1 >= BOUND {
-            return Err(format!("x-coord should be less than {}, got {}", BOUND, c1));
+            bail!("x-coord should be less than {}, got {}", BOUND, c1);
         }
 
-        let c2 = split[1].parse::<usize>();
-        if let Err(_) = c2 {
-            return Err(format!("could not parse {} as usize", split[1]));
-        }
-        let c2 = c2.unwrap();
+        let c2 = split[1]
+            .parse()
+            .context(format!("could not parse {} as usize", split[1]))?;
         if c2 >= BOUND {
-            return Err(format!("y-coord should be less than {}, got {}", BOUND, c2));
+            bail!("y-coord should be less than {}, got {}", BOUND, c2);
         }
 
         Ok(Point(c1, c2))
@@ -55,22 +52,15 @@ struct Line(Point, Point);
 
 impl Line {
     /// new("816,14 -> 748,14") -> Point from (816,14) to (748,14)
-    fn new(input: &str) -> Result<Line, String> {
+    fn new(input: &str) -> Result<Line> {
         let points: Vec<&str> = input.split(" -> ").collect();
         if points.len() != 2 {
-            return Err(String::from("could not split points"));
+            bail!("could not split points");
         }
 
-        let p1 = Point::new(points[0]);
-        if let Err(e) = p1 {
-            return Err(format!("could not parse {} as point: {}", points[0], e));
-        }
-        let p2 = Point::new(points[1]);
-        if let Err(e) = p2 {
-            return Err(format!("could not parse {} as point: {}", points[1], e));
-        }
-
-        Ok(Line(p1.unwrap(), p2.unwrap()))
+        let p1 = Point::new(points[0]).context("could not parse first point")?;
+        let p2 = Point::new(points[1]).context("could not parse seconod popint")?;
+        Ok(Line(p1, p2))
     }
 
     /// checks if the Line is parallel to the x- or y-axis.
@@ -154,14 +144,11 @@ impl fmt::Display for Grid {
     }
 }
 
-pub fn d05(lines: Vec<String>) -> Result<(String, String), String> {
+pub fn d05(lines: Vec<String>) -> Result<(String, String)> {
     let mut ls = Vec::new();
     for line in lines {
-        let ll = Line::new(&line);
-        match ll {
-            Err(e) => return Err(format!("could not read line `{}`: {}", line, e)),
-            Ok(ll) => ls.push(ll),
-        }
+        let ll = Line::new(&line).context(format!("could not read line `{}`", line))?;
+        ls.push(ll);
     }
     let lines = ls;
     let mut grid = Grid::new();

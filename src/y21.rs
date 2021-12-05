@@ -1,10 +1,12 @@
+use anyhow::Result;
+
 mod d01;
 mod d02;
 mod d03;
 mod d04;
 mod d05;
 
-pub fn solver(day: u8) -> fn(Vec<String>) -> Result<(String, String), String> {
+pub fn solver(day: u8) -> fn(Vec<String>) -> Result<(String, String)> {
     match day {
         1 => d01::d01,
         2 => d02::d02,

@@ -1,4 +1,5 @@
 use crate::util::vectors;
+use anyhow::{bail, Context, Result};
 use std::collections::HashMap;
 use std::collections::HashSet;
 
@@ -9,12 +10,12 @@ struct BingoCard {
 }
 
 impl BingoCard {
-    fn new(lines: &Vec<String>) -> Result<BingoCard, String> {
+    fn new(lines: &Vec<String>) -> Result<BingoCard> {
         if lines.len() != 5 {
-            return Err(format!(
+            bail!(
                 "expected number of lines to be 5, got {} instead",
                 lines.len()
-            ));
+            );
         }
 
         let mut result = BingoCard {
@@ -23,11 +24,9 @@ impl BingoCard {
         };
         for line in lines {
             let row = vectors::split_and_trim(line, ' ');
-            let row = vectors::from_strs::<u32>(&row);
-            if let Err(e) = row {
-                return Err(format!("could not parse line `{}`: {}", line, e));
-            }
-            result.nums.push(row.unwrap());
+            let row = vectors::from_strs::<u32>(&row)
+                .context(format!("could not parse line `{}`", line))?;
+            result.nums.push(row);
         }
 
         Ok(result)
@@ -113,33 +112,21 @@ struct BingoCards {
 }
 
 impl BingoCards {
-    fn new(groups: &Vec<Vec<String>>) -> Result<BingoCards, String> {
+    fn new(groups: &Vec<Vec<String>>) -> Result<BingoCards> {
         let mut result = BingoCards {
             cards: Vec::new(),
             lookup: HashMap::new(),
         };
 
         for group in groups {
-            let card = BingoCard::new(group);
-            if let Err(e) = card {
-                return Err(format!("could not interpret group {:#?}: {}", group, e));
-            }
-            let card = card.unwrap();
+            let card =
+                BingoCard::new(group).context(format!("could not interpret group {:?}", group))?;
 
             // Update lookup to include items from cards
             for row in &card.nums {
                 for num in row {
-                    let vv = result.lookup.get_mut(num);
-                    match vv {
-                        None => {
-                            let mut vv = Vec::new();
-                            vv.push(result.cards.len());
-                            result.lookup.insert(*num, vv);
-                        }
-                        Some(m) => {
-                            m.push(result.cards.len());
-                        }
-                    }
+                    let m = result.lookup.entry(*num).or_insert(Vec::new());
+                    m.push(result.cards.len());
                 }
             }
             result.cards.push(card);
@@ -190,44 +177,31 @@ impl BingoCards {
     }
 }
 
-pub fn d04(lines: Vec<String>) -> Result<(String, String), String> {
+pub fn d04(lines: Vec<String>) -> Result<(String, String)> {
     let mut groups = vectors::group(lines);
     if groups.len() < 2 {
-        return Err(String::from(
-            "input must have at least two groups of continguous lines",
-        ));
+        bail!("input must have at least two groups of continguous lines");
     }
 
     let mut bingo_numbers = groups.swap_remove(0);
     if bingo_numbers.len() != 1 {
-        return Err(format!(
-            "group[0] must have length 1, got {}",
-            bingo_numbers.len()
-        ));
+        bail!("group[0] must have length 1, got {}", bingo_numbers.len());
     }
     let bingo_numbers = bingo_numbers.remove(0); // Take the first row of the group
     let bingo_numbers = vectors::split_and_trim(&bingo_numbers, ',');
-    let bingo_numbers = vectors::from_strs::<u32>(&bingo_numbers);
-    if let Err(e) = bingo_numbers {
-        return Err(format!("could not format bingo numbers properly: {}", e));
-    }
-    let bingo_numbers = bingo_numbers.unwrap();
+    let bingo_numbers = vectors::from_strs::<u32>(&bingo_numbers)
+        .context("could not format bingo nunmbers properly")?;
 
-    let bingo_cards = BingoCards::new(&groups);
-    if let Err(e) = bingo_cards {
-        return Err(format!("could not format bingo cards properly: {}", e));
-    }
-    let mut bingo_cards = bingo_cards.unwrap();
+    let mut bingo_cards =
+        BingoCards::new(&groups).context("could not format bingo cards properly")?;
 
     // Part 1: First to win
     let mut ans1 = 0;
     for num in &bingo_numbers {
-        match bingo_cards.shade(*num) {
-            None => {}
-            Some(winners) => {
-                ans1 = winners[0].1;
-                break;
-            }
+        let result = bingo_cards.shade(*num);
+        if let Some(winners) = result {
+            ans1 = winners[0].1;
+            break;
         }
     }
 
@@ -241,16 +215,13 @@ pub fn d04(lines: Vec<String>) -> Result<(String, String), String> {
     let mut ans2 = 0;
     for num in &bingo_numbers {
         let result = bingo_cards.shade(*num);
-        match result {
-            None => {}
-            Some(winners) => {
-                for vv in &winners {
-                    all_card_indices.remove(&vv.0);
-                }
-                if all_card_indices.is_empty() {
-                    ans2 = winners[0].1;
-                    break;
-                }
+        if let Some(winners) = result {
+            for vv in &winners {
+                all_card_indices.remove(&vv.0);
+            }
+            if all_card_indices.is_empty() {
+                ans2 = winners[0].1;
+                break;
             }
         }
     }

@@ -1,8 +1,9 @@
+use anyhow::{bail, Result};
 use std::any;
 use std::fmt;
 use std::str::FromStr;
 
-pub fn from_strs<T>(strs: &Vec<String>) -> Result<Vec<T>, String>
+pub fn from_strs<T>(strs: &Vec<String>) -> Result<Vec<T>>
 where
     T: FromStr,
     <T as FromStr>::Err: fmt::Debug,
@@ -10,14 +11,14 @@ where
     let mut result = Vec::new();
     for str in strs {
         let item: Result<T, _> = str.parse();
-        if let Err(_) = item {
-            return Err(format!(
+        match item {
+            Err(_) => bail!(
                 "could not format `{}` as type `{}`",
                 str,
                 any::type_name::<T>()
-            ));
+            ),
+            Ok(o) => result.push(o),
         }
-        result.push(item.unwrap());
     }
     Ok(result)
 }

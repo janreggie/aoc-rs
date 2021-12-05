@@ -47,14 +47,17 @@ fn main() {
     // Do the needful
     let before = Instant::now();
     let result = solver(lines);
-    let result = result.unwrap_or_else(|err| panic!("could not solve y{}-d{}: {}", year, day, err));
+    if let Err(e) = result {
+        panic!("could not solve y{}-d{}: {:?}", year, day, e);
+    }
+    let result = result.unwrap();
     let after = Instant::now();
 
     // Print out the results
     println!("Answer for Part 1 is {}", result.0);
     println!("Answer for Part 2 is {}", result.1);
     println!(
-        "It took {:#?} to solve the current problem",
+        "It took {:?} to solve the current problem",
         after.sub(before)
     );
 }
@@ -64,10 +67,7 @@ fn read_lines() -> io::Result<Vec<String>> {
     let lines = stdin.lock().lines();
     let mut result = Vec::new();
     for line in lines {
-        match line {
-            Ok(l) => result.push(l),
-            Err(e) => return Err(e),
-        }
+        result.push(line?);
     }
 
     Ok(result)

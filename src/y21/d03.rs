@@ -1,3 +1,5 @@
+use anyhow::{bail, Context, Result};
+
 #[derive(Debug, Copy, Clone)]
 struct Number(u32);
 
@@ -12,10 +14,10 @@ struct Report {
 impl Number {
     fn new(input: &str) -> Option<Number> {
         let result = u32::from_str_radix(input, 2);
-        if let Err(_) = result {
-            return None;
+        match result {
+            Err(_) => None,
+            Ok(num) => Some(Number(num)),
         }
-        Some(Number(result.unwrap()))
     }
 
     /// Checks if the number has the `pos`'th bit set to 1.
@@ -26,9 +28,9 @@ impl Number {
 }
 
 impl Report {
-    fn new(lines: &Vec<String>) -> Result<Report, String> {
+    fn new(lines: &Vec<String>) -> Result<Report> {
         if lines.len() == 0 {
-            return Err(String::from("empty lines"));
+            bail!("empty lines");
         }
         let mut result = Report {
             nums: Vec::new(),
@@ -36,17 +38,17 @@ impl Report {
         };
         for line in lines {
             if line.len() != result.bitsize {
-                return Err(format!(
+                bail!(
                     "line `{}` expected to be of length {}, got {}",
                     line,
                     result.bitsize,
                     line.len()
-                ));
+                );
             }
             let number = Number::new(line);
             match number {
                 Some(x) => result.nums.push(x),
-                None => return Err(format!("invalid line `{}`", line)),
+                None => bail!("invalid line `{}`", line),
             }
         }
 
@@ -140,12 +142,8 @@ impl Report {
     }
 }
 
-pub fn d03(lines: Vec<String>) -> Result<(String, String), String> {
-    let report = Report::new(&lines);
-    if let Err(e) = report {
-        return Err(format!("could not read input data: {}", e));
-    }
-    let report = report.unwrap();
+pub fn d03(lines: Vec<String>) -> Result<(String, String)> {
+    let report = Report::new(&lines).context("could not read input data")?;
 
     let ans1 = report.power_consumption();
     let ans2 = report.life_support_rating();

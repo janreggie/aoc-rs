@@ -1,11 +1,9 @@
 use crate::util::vectors;
+use anyhow::{Context, Result};
 
-pub fn d01(lines: Vec<String>) -> Result<(String, String), String> {
-    let nums = vectors::from_strs::<u32>(&lines);
-    if let Err(e) = nums {
-        return Err(format!("could not convert all input into nums {}", e));
-    }
-    let nums = nums.unwrap();
+pub fn d01(lines: Vec<String>) -> Result<(String, String)> {
+    let nums =
+        vectors::from_strs::<u32>(&lines).context("could not convert all input into nums")?;
 
     // Part 1: Larger than previous
     let mut ans1 = 0;

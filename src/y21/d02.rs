@@ -1,4 +1,5 @@
 use crate::util::vectors;
+use anyhow::{bail, Context, Result};
 
 /// A submarine instruction.
 enum Instruction {
@@ -9,46 +10,34 @@ enum Instruction {
 
 impl Instruction {
     /// Create insturction from line such as `forward 5` or `down 4`
-    fn new(line: &str) -> Result<Instruction, String> {
+    fn new(line: &str) -> Result<Instruction> {
         let split = vectors::split_and_trim(line, ' ');
         if split.len() != 2 {
-            return Err(format!(
+            bail!(
                 "expected line to be split into two parts, got {}",
                 split.len()
-            ));
+            );
         }
 
-        let count: Result<u32, _> = split[1].parse();
-        if let Err(_) = count {
-            return Err(format!("could not format count `{}` as u32", split[1]));
-        }
-        let count = count.unwrap();
+        let count: u32 = split[1]
+            .parse()
+            .context(format!("could not format count `{}` as integer", split[1]))?;
 
         match split[0].as_str() {
             "forward" => Ok(Instruction::Forward(count)),
             "down" => Ok(Instruction::Down(count)),
             "up" => Ok(Instruction::Up(count)),
-            _ => Err(format!(
-                "could not interpret instruction `{}` properly",
-                split[0]
-            )),
+            _ => bail!("could not interpret instruction `{}` properly", split[0]),
         }
     }
 }
 
-pub fn d02(lines: Vec<String>) -> Result<(String, String), String> {
+pub fn d02(lines: Vec<String>) -> Result<(String, String)> {
     let mut instrs = Vec::new();
     for line in lines {
-        let instr = Instruction::new(&line);
-        match instr {
-            Ok(instr) => instrs.push(instr),
-            Err(e) => {
-                return Err(format!(
-                    "could not parse instruction of line `{}`: `{}`",
-                    line, e
-                ))
-            }
-        }
+        let instr = Instruction::new(&line)
+            .context(format!("could not parse instruction of line `{}`", line))?;
+        instrs.push(instr);
     }
 
     // Part 1: A simpler way to go through all instructions
