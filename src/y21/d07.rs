@@ -3,8 +3,7 @@ use anyhow::{bail, Context, Result};
 
 struct CrabPositions {
     positions: Vec<u32>,
-    counts: Vec<u32>,       // counts[x] == number of crabs at pos. positions[x]
-    cumul_counts: Vec<u32>, // cumul_counts[x] = sum of counts[i] from 0..x+1. Yes, inclusive of x.
+    counts: Vec<u32>, // counts[x] == number of crabs at pos. positions[x]
 }
 
 impl CrabPositions {
@@ -31,17 +30,7 @@ impl CrabPositions {
             }
         }
 
-        let mut cumul_counts = vec![0; counts.len()];
-        cumul_counts[0] = counts[0];
-        for ii in 1..counts.len() {
-            cumul_counts[ii] = cumul_counts[ii - 1] + counts[ii];
-        }
-
-        Ok(CrabPositions {
-            positions,
-            counts,
-            cumul_counts,
-        })
+        Ok(CrabPositions { positions, counts })
     }
 
     /// Computes the fuel that the crabs will have to spend
@@ -71,6 +60,7 @@ impl CrabPositions {
         result
     }
 
+    // TODO: Can you find a linear time solution?
     fn find_ideal_lin(&self) -> u32 {
         let mut result = u32::MAX;
         for pos in &self.positions {
@@ -86,6 +76,7 @@ impl CrabPositions {
         result
     }
 
+    // TODO: Can you find a linear time solution?
     fn find_ideal_sq(&self) -> u32 {
         let mut result = u32::MAX;
         for pos in &self.positions {
