@@ -1,6 +1,5 @@
 use crate::util::vectors;
 use anyhow::{bail, Context, Result};
-use superslice::*;
 
 struct CrabPositions {
     positions: Vec<u32>,
@@ -66,7 +65,7 @@ impl CrabPositions {
     /// if the amount of fuel that a crab has to spend
     /// is proportional to the **square** of its distance to said position.
     fn compute_fuel_sq(&self, pos: u32) -> u32 {
-        let ss = |x: u32| x * (x + 1) / 2;
+        let ss = |x: u32| x * (x + 1) / 2; // fuel is triangular numbers
         let fuel = |p: u32| ss(if p > pos { p - pos } else { pos - p });
 
         let mut result = 0;
@@ -75,6 +74,10 @@ impl CrabPositions {
         }
         result
     }
+
+    // For the below methods,
+    // you might want to read on minimizing and maximizing.
+    // <http://www1.udel.edu/nag/ohucl05pd/c/Manual/E04/e04int_cl05.pdf> is a good resource.
 
     fn find_ideal_lin(&self) -> u32 {
         // TODO: The median minimizes the sum of absolute deviations.
@@ -97,7 +100,7 @@ impl CrabPositions {
     }
 
     fn find_ideal_sq(&self) -> u32 {
-        // TODO: The mean minimizes the meaen squared error.
+        // TODO: The mean minimizes the mean squared error.
         // See <https://math.stackexchange.com/a/967182> on what I mean by that.
         // That solution would be of linear time,
         // compared to the one below which is quadratic.
