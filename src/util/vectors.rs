@@ -25,9 +25,10 @@ where
 
 /// Splits str into chunks by delim.
 /// Multiple delim's between values (e.g., spaces) will be removed.
-/// Example:
 ///
-///     split_and_trim(" a b  c  d   ") -> ["a","b","c","d"]
+/// ```none
+/// split_and_trim(" a b  c  d   "); // returns vec!["a","b","c","d"]
+/// ```
 ///
 pub fn split_and_trim(str: &str, delim: char) -> Vec<String>
 where
@@ -42,7 +43,9 @@ where
 /// Groups together strings which aren't empty.
 /// For example:
 ///
-///     group(["a", "b", "", "c", "d"]) -> [["a","b"], ["c","d"]]
+/// ```none
+/// group(["a", "b", "", "c", "d"]); // returns vec![vec!["a","b"], vec!["c","d"]]
+/// ```
 ///
 pub fn group(strs: Vec<String>) -> Vec<Vec<String>> {
     let mut result: Vec<Vec<String>> = Vec::new();
