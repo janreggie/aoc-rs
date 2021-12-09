@@ -144,7 +144,7 @@ impl fmt::Display for Grid {
     }
 }
 
-pub fn d05(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     let mut ls = Vec::new();
     for line in lines {
         let ll = Line::new(&line).context(format!("could not read line `{}`", line))?;

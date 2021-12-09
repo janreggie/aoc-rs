@@ -353,7 +353,7 @@ impl Entry {
     }
 }
 
-pub fn d08(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     let mut entries = Vec::new();
     for line in lines {
         let entry = Entry::new(&line).context(format!("could not process line `{}`", line))?;

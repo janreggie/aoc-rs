@@ -32,7 +32,7 @@ impl Instruction {
     }
 }
 
-pub fn d02(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     let mut instrs = Vec::new();
     for line in lines {
         let instr = Instruction::new(&line)

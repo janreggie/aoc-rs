@@ -121,7 +121,7 @@ impl CrabPositions {
     }
 }
 
-pub fn d07(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     if lines.len() != 1 {
         bail!("expected lines to be of length 1, got {}", lines.len());
     }

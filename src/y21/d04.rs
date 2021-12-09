@@ -177,7 +177,7 @@ impl BingoCards {
     }
 }
 
-pub fn d04(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     let mut groups = vectors::group(lines);
     if groups.len() < 2 {
         bail!("input must have at least two groups of continguous lines");

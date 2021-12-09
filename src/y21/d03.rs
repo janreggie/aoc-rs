@@ -142,7 +142,7 @@ impl Report {
     }
 }
 
-pub fn d03(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     let report = Report::new(&lines).context("could not read input data")?;
 
     let ans1 = report.power_consumption();

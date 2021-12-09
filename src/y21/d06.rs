@@ -46,7 +46,7 @@ impl LanternfishCounts {
     }
 }
 
-pub fn d06(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     if lines.len() != 1 {
         bail!("expected number of lines to be 1, got {}", lines.len());
     }
