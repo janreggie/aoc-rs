@@ -106,8 +106,7 @@ impl Heightmap {
                 // Do something of a DFS from that node
                 let mut size = 0;
                 let mut stack = vec![(x, y)];
-                while let Some(v) = stack.pop() {
-                    let (x, y) = v;
+                while let Some((x, y)) = stack.pop() {
                     state[y][x] = State::Visited;
                     size += 1;
 
