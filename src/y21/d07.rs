@@ -3,9 +3,7 @@ use anyhow::{bail, Context, Result};
 
 struct CrabPositions {
     positions: Vec<u32>,
-    counts: Vec<u32>,     // counts[x] == number of crabs at pos. positions[x]
-    cum_counts: Vec<u32>, // cum_counts[x] = cum_counts[x-1] + counts[x]
-    len: usize,           // length of positions, counts, and cum_counts
+    counts: Vec<u32>, // counts[x] == number of crabs at pos. positions[x]
 }
 
 impl CrabPositions {
@@ -33,19 +31,7 @@ impl CrabPositions {
             }
         }
 
-        let len = positions.len();
-        let mut cum_counts = vec![0; len];
-        cum_counts[0] = counts[0];
-        for ii in 1..len {
-            cum_counts[ii] = cum_counts[ii - 1] + counts[ii];
-        }
-
-        Ok(CrabPositions {
-            positions,
-            counts,
-            cum_counts,
-            len,
-        })
+        Ok(CrabPositions { positions, counts })
     }
 
     /// Computes the fuel that the crabs will have to spend
@@ -83,7 +69,6 @@ impl CrabPositions {
         // TODO: The median minimizes the sum of absolute deviations.
         // That solution would be of linear time,
         // compared to the one below which is quadratic.
-        // I have added len, cum_counts which would aid in writing such a solution.
 
         let mut result = u32::MAX;
         for pos in &self.positions {
@@ -104,7 +89,6 @@ impl CrabPositions {
         // See <https://math.stackexchange.com/a/967182> on what I mean by that.
         // That solution would be of linear time,
         // compared to the one below which is quadratic.
-        // I have added len, cum_counts which would aid in writing such a solution.
 
         let mut result = u32::MAX;
         for pos in &self.positions {
