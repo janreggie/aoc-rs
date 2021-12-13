@@ -3,12 +3,12 @@ use anyhow::{bail, Context, Result};
 use std::collections::{HashMap, HashSet};
 
 #[derive(Debug)]
-struct Graph {
+struct Caves {
     paths: HashMap<String, HashSet<String>>,
 }
 
-impl Graph {
-    fn new(lines: Vec<String>) -> Result<Graph> {
+impl Caves {
+    fn new(lines: Vec<String>) -> Result<Caves> {
         let mut paths = HashMap::new();
 
         for line in lines {
@@ -25,20 +25,84 @@ impl Graph {
             p.insert(n1.clone());
         }
 
-        Ok(Graph { paths })
+        Ok(Caves { paths })
     }
 
-    fn paths_from_start_to_end(&self) -> usize {
-        // Okay, let's go from here to there...
-        0
+    fn part_1(&self) -> usize {
+        self.part_1_iter(Vec::new(), "start").0
+    }
+
+    fn part_1_iter(&self, mut stack: Vec<String>, current: &str) -> (usize, Vec<String>) {
+        let mut result = 0;
+
+        for next in self.paths.get(current).unwrap() {
+            if next == "end" {
+                result += 1;
+                continue;
+            }
+            if next == "start" {
+                continue;
+            }
+            if stack.contains(next) && !Caves::is_big(next) {
+                continue;
+            }
+
+            stack.push(String::from(next));
+            let (partial, next_stack) = self.part_1_iter(stack, next);
+            stack = next_stack;
+            stack.pop();
+            result += partial;
+        }
+
+        (result, stack)
+    }
+
+    fn part_2(&self) -> usize {
+        self.part_2_iter(Vec::new(), "start", false).0
+    }
+
+    fn part_2_iter(
+        &self,
+        mut stack: Vec<String>,
+        current: &str,
+        twice_visited: bool,
+    ) -> (usize, Vec<String>) {
+        let mut result = 0;
+
+        for next in self.paths.get(current).unwrap() {
+            if next == "end" {
+                result += 1;
+                continue;
+            }
+            if next == "start" {
+                continue;
+            }
+            let exists_in_stack = stack.contains(next) && !Caves::is_big(next);
+            if exists_in_stack && twice_visited {
+                continue;
+            }
+
+            stack.push(String::from(next));
+            let (partial, next_stack) =
+                self.part_2_iter(stack, next, twice_visited | exists_in_stack);
+            stack = next_stack;
+            stack.pop();
+            result += partial;
+        }
+
+        (result, stack)
+    }
+
+    fn is_big(cave: &str) -> bool {
+        cave.to_ascii_uppercase().eq(cave)
     }
 }
 
 pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
-    let graph = Graph::new(lines).context("could not create graph")?;
-    dbg!(&graph);
+    let graph = Caves::new(lines).context("could not create graph")?;
 
-    let ans1 = graph.paths_from_start_to_end();
+    let ans1 = graph.part_1();
+    let ans2 = graph.part_2();
 
-    Ok((ans1.to_string(), String::from("unimplemented")))
+    Ok((ans1.to_string(), ans2.to_string()))
 }
