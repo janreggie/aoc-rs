@@ -27,7 +27,9 @@ const DIGITS: [[bool; 7]; 10] = [
 impl Signals {
     /// Constructor.
     ///
-    ///     new("abef") == new("fbae") == Signals([True,T,False,F,T,T,F])
+    /// ```none
+    /// new("abef") == new("fbae") == Signals([True,T,False,F,T,T,F])
+    /// ```
     ///
     fn new(input: &str) -> Result<Signals> {
         let mut signals = [F; 7];

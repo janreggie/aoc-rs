@@ -17,13 +17,17 @@ fn literal_to_bits(input: u128) -> Vec<bool> {
 }
 
 #[cfg(test)]
-#[test]
-fn test_literal_to_bits() {
-    let (t, f) = (true, false);
-    let testcases: Vec<(u128, Vec<bool>)> =
-        vec![(3, vec![t, t]), (4, vec![t, f, f]), (2, vec![t, f])];
-    for (lit, bits) in testcases {
-        assert_eq!(bits, literal_to_bits(lit));
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_literal_to_bits() {
+        let (t, f) = (true, false);
+        let testcases: Vec<(u128, Vec<bool>)> =
+            vec![(3, vec![t, t]), (4, vec![t, f, f]), (2, vec![t, f])];
+        for (lit, bits) in testcases {
+            assert_eq!(bits, literal_to_bits(lit));
+        }
     }
 }
 

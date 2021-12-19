@@ -16,6 +16,7 @@ mod d13;
 mod d14;
 mod d15;
 mod d16;
+mod d17;
 
 pub fn solver(day: u8) -> fn(Vec<String>) -> Result<(String, String)> {
     match day {
@@ -35,6 +36,7 @@ pub fn solver(day: u8) -> fn(Vec<String>) -> Result<(String, String)> {
         14 => d14::solve,
         15 => d15::solve,
         16 => d16::solve,
+        17 => d17::solve,
         _ => panic!("unimplemented day {}", day),
     }
 }
