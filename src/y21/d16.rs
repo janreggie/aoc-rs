@@ -1,5 +1,5 @@
-use anyhow::{bail, Context, Result};
-// use std::collections::VecDeque;
+use anyhow::{anyhow, bail, Context, Result};
+use std::cmp::Ordering;
 
 /// Returns the bit sequence of the input into its binary form.
 /// For example:
@@ -33,25 +33,13 @@ fn test_literal_to_bits() {
 fn bits_to_literal(input: &[bool]) -> u128 {
     let mut result = 0;
     for &b in input {
+        result *= 2; // first attempt is a no-op
         if b {
             result += 1;
         }
-        result *= 2;
     }
 
-    result /= 2; // We overmultiplied
     result
-}
-
-fn print_bits(input: &[bool]) {
-    for &b in input {
-        if b {
-            eprint!("#")
-        } else {
-            eprint!(".")
-        }
-    }
-    eprintln!("")
 }
 
 fn input_to_bits(input: &str) -> Result<Vec<bool>> {
@@ -64,6 +52,7 @@ fn input_to_bits(input: &str) -> Result<Vec<bool>> {
         match lookup(c) {
             None => bail!("could not interpret character `{}`", c),
             Some(v) => {
+                // Extra padding
                 for _ in 0..(4 - v.len()) {
                     result.push(false);
                 }
@@ -89,19 +78,21 @@ struct Packet {
 }
 
 impl Packet {
-    fn new(bits: &[bool]) -> Option<Packet> {
+    fn new(bits: &[bool]) -> Result<Packet> {
         let iter = bits.iter();
         let (packet, rest) = Packet::it(iter);
         if rest.len() != 0 {
-            None
-        } else {
-            packet
+            bail!("could not create a Packet with input of len 0")
         }
+        packet
     }
 
-    fn it(mut bits: std::slice::Iter<bool>) -> (Option<Packet>, std::slice::Iter<bool>) {
+    fn it(mut bits: std::slice::Iter<bool>) -> (Result<Packet>, std::slice::Iter<bool>) {
         if bits.len() == 0 {
-            return (None, bits);
+            return (
+                Err(anyhow!("could not create a Packet with input of len 0")),
+                bits,
+            );
         }
 
         let mut version = Vec::new();
@@ -114,7 +105,6 @@ impl Packet {
             type_id.push(*bits.next().unwrap_or(&false));
         }
         let type_id = bits_to_literal(&type_id);
-        eprintln!("version: {}, type_id: {}", version, type_id);
 
         let data: PacketData;
         if type_id == 4 {
@@ -131,17 +121,76 @@ impl Packet {
             let literal = bits_to_literal(&literal);
             data = PacketData::Literal(literal);
         } else {
-            // TODO: Fix this part. This is wrong!!
             let length_type_id = *bits.next().unwrap_or(&false);
-            let bb = bits;
-            let (p1, bb) = Packet::it(bb);
-            let (p2, bb) = Packet::it(bb);
-            if p1.is_none() || p2.is_none() {
-                return (None, bb);
-            }
+            let mut subpackets = Vec::new();
 
-            bits = bb;
-            data = PacketData::Subpacket(Box::new(p1.unwrap()), Box::new(p2.unwrap()));
+            if length_type_id {
+                // Get the next 11 bits
+                let mut subpacket_count = vec![];
+                for _ in 0..11 {
+                    subpacket_count.push(*bits.next().unwrap_or(&false));
+                }
+                let subpacket_count = bits_to_literal(&subpacket_count) as usize;
+
+                while subpackets.len() < subpacket_count {
+                    let (subpacket, bb) = Packet::it(bits);
+                    match subpacket {
+                        Ok(s) => subpackets.push(s),
+                        Err(e) => {
+                            return (
+                                Err(e).context(format!(
+                                    "could not insert subpacket {} of {}",
+                                    subpackets.len() + 1,
+                                    subpacket_count
+                                )),
+                                bb,
+                            )
+                        }
+                    }
+                    bits = bb;
+                }
+            } else {
+                // Get the next 15 bits
+                let mut to_consume = vec![];
+                for _ in 0..15 {
+                    to_consume.push(*bits.next().unwrap_or(&false));
+                }
+                let to_consume = bits_to_literal(&to_consume) as usize;
+
+                let initial_length = bits.len();
+                while bits.len() != 0 {
+                    let bb = bits;
+                    let (subpacket, bb) = Packet::it(bb);
+                    match subpacket {
+                        Ok(s) => subpackets.push(s),
+                        Err(e) => {
+                            return (
+                                Err(e).context(format!(
+                                    "could not insert subpacket {}",
+                                    subpackets.len() + 1,
+                                )),
+                                bb,
+                            )
+                        }
+                    }
+                    let consumed = initial_length - bb.len();
+                    if consumed == to_consume {
+                        bits = bb;
+                        break;
+                    } else if consumed > to_consume {
+                        return (
+                            Err(anyhow!(
+                                "overconsumed: expected to consume {} bits, got {}",
+                                to_consume,
+                                consumed
+                            )),
+                            bb,
+                        );
+                    }
+                    bits = bb;
+                }
+            }
+            data = PacketData::Subpackets(subpackets);
         }
 
         let packet = Packet {
@@ -149,21 +198,57 @@ impl Packet {
             type_id,
             data,
         };
-        (Some(packet), bits)
+        (Ok(packet), bits)
     }
 
     fn get_version_sum(&self) -> u128 {
         self.version
             + match &self.data {
                 PacketData::Literal(_) => 0,
-                PacketData::Subpacket(p1, p2) => p1.get_version_sum() + p2.get_version_sum(),
+                PacketData::Subpackets(vv) => vv.iter().map(|p| p.get_version_sum()).sum(),
             }
+    }
+
+    fn value(&self) -> Result<u128> {
+        match &self.data {
+            PacketData::Literal(v) => Ok(*v),
+            PacketData::Subpackets(vv) => {
+                let vv: Result<Vec<u128>> = vv.iter().map(|p| p.value()).collect();
+                let vv = vv.context("could not evaluate subpackets")?;
+
+                let expect = |cmp: Ordering| {
+                    if vv.len() != 2 {
+                        bail!("expect input to be of length 2")
+                    }
+
+                    let (v1, v2) = (vv[0], vv[1]);
+                    Ok(if v1.cmp(&v2) == cmp { 1 } else { 0 })
+                };
+
+                let vv = vv.iter();
+                match self.type_id {
+                    0 => Ok(vv.sum()),
+                    1 => Ok(vv.product()),
+                    2 => Ok(*vv.min().context("zero subpackets")?),
+                    3 => Ok(*vv.max().context("zero subpackets")?),
+                    4 => Err(anyhow!("PacketData should be Literal for type id 4")),
+                    5 => expect(Ordering::Greater),
+                    6 => expect(Ordering::Less),
+                    7 => expect(Ordering::Equal),
+                    _ => Err(anyhow!("unknown type id {}", self.type_id)),
+                }
+            }
+            .context(format!(
+                "could not evaluate value of Packet ID: {}, Version: {}",
+                self.type_id, self.version
+            )),
+        }
     }
 }
 
 enum PacketData {
     Literal(u128),
-    Subpacket(Box<Packet>, Box<Packet>),
+    Subpackets(Vec<Packet>),
 }
 
 pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
@@ -173,11 +258,10 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     let mut lines = lines;
     let input = lines.pop().unwrap();
     let bits = input_to_bits(&input).context("could not parse input")?;
-    print_bits(&bits);
-
-    // Part 1: I don't know what I'm doing
     let packet = Packet::new(&bits).context("could not create packet from input")?;
-    let ans1 = packet.get_version_sum();
 
-    Ok((ans1.to_string(), String::from("unimplemented")))
+    let ans1 = packet.get_version_sum();
+    let ans2 = packet.value().context("could not get value")?;
+
+    Ok((ans1.to_string(), ans2.to_string()))
 }
