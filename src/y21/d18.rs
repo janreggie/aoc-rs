@@ -95,6 +95,26 @@ impl Snailfish {
         self
     }
 
+    // Returns how many nodes have been split, or None if there aren't any
+    fn simplify_split(&mut self) -> Option<usize> {
+        // Note: Look up `RefCell` and `Rc`. See <https://leetcode.com/problems/minimum-depth-of-binary-tree/discuss/1140809/rust-iterative-bfs>.
+        let mut modified = 0;
+        let mut stack = Vec::new();
+        // Put leftmost value in stack
+        let mut it = self;
+        while let Snailfish::Pair(l, _) = it {
+            stack.push(&it);
+            it = l;
+        }
+        // Finally, we're left with the leftmost
+
+        if modified == 0 {
+            None
+        } else {
+            Some(modified)
+        }
+    }
+
     fn magnitude(&self) -> u128 {
         match self {
             Snailfish::Number(x) => *x,
@@ -104,12 +124,15 @@ impl Snailfish {
 }
 
 pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
-    let mut snailfishes = Vec::new();
+    let mut sum = None;
     for line in lines {
         let snailfish =
             Snailfish::new(&line).context(format!("could not parse line `{}`", line))?;
         dbg!(&snailfish);
-        snailfishes.push(snailfish);
+        match sum {
+            None => sum = Some(snailfish),
+            Some(ss) => sum = Some(ss.add(snailfish)),
+        }
     }
 
     unimplemented!()
