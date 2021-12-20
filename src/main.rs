@@ -46,11 +46,10 @@ fn main() {
 
     // Do the needful
     let before = Instant::now();
-    let result = solver(lines);
-    if let Err(e) = result {
-        panic!("could not solve y{}-d{}: {:?}", year, day, e);
-    }
-    let result = result.unwrap();
+    let result = match solver(lines) {
+        Err(e) => panic!("could not solve y{}-d{}: {:?}", year, day, e),
+        Ok(r) => r,
+    };
     let after = Instant::now();
 
     // Print out the results
