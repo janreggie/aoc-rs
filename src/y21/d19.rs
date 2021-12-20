@@ -1,4 +1,5 @@
 use anyhow::{bail, Context, Result};
+use sscanf::scanf;
 
 /// A position, relative to a Scanner (at origin).
 struct Position {
@@ -56,6 +57,31 @@ enum RelativeOrientation {
     XZY,
     YXZ,
     ZYX,
+}
+
+/// Scanner probed data
+struct Scanner {
+    name: String,
+    beacons: Vec<Position>,
+}
+
+impl Scanner {
+    fn new(mut lines: Vec<String>) -> Result<Scanner> {
+        if lines.len() < 13 {
+            bail!(
+                "expects there to be at least 13 lines, got {} instead",
+                lines.len()
+            )
+        }
+
+        let name = lines.swap_remove(0);
+        for line in lines {
+            let (x, y, z) = scanf!(line, "{},{},{}", i32, i32, i32)
+                .context(format!("could not parse line `{}`", line))?;
+        }
+
+        unimplemented!()
+    }
 }
 
 pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
