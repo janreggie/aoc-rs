@@ -1,7 +1,11 @@
+use crate::util::vectors;
 use anyhow::{bail, Context, Result};
 use sscanf::scanf;
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
 
 /// A position, relative to a Scanner (at origin).
+#[derive(PartialEq, Eq)]
 struct Position {
     x: i32,
     y: i32,
@@ -20,7 +24,7 @@ impl Position {
     /// rotate((1,2,3), ZXY) == (3,1,2)
     /// rotate((1,2,3), XZY) == (1,3,-2) (because XZY is a "negative orientation")
     /// ```
-    fn rotate(&self, orientation: RelativeOrientation) -> Position {
+    fn rotate(&self, orientation: &RelativeOrientation) -> Position {
         match orientation {
             RelativeOrientation::XYZ => Position::new(self.x, self.y, self.z),
             RelativeOrientation::YZX => Position::new(self.y, self.z, self.x),
@@ -47,6 +51,7 @@ impl Position {
 }
 
 /// How another Scanner is oriented relative to another Scanner
+#[derive(EnumIter)]
 enum RelativeOrientation {
     // Positive orientations. Signs don't change.
     XYZ,
@@ -75,15 +80,38 @@ impl Scanner {
         }
 
         let name = lines.swap_remove(0);
+        let mut beacons = Vec::new();
         for line in lines {
             let (x, y, z) = scanf!(line, "{},{},{}", i32, i32, i32)
                 .context(format!("could not parse line `{}`", line))?;
+            beacons.push(Position::new(x, y, z));
         }
 
-        unimplemented!()
+        Ok(Scanner { name, beacons })
+    }
+
+    /// There are twelve items in `self.beacons` (each being `b_s`) that coincide with `other.beacons` (`b_o`)
+    /// such that `self.conform(other) == Some((ro, (dx,dy,dz))) <=> b_s.rotate(ro).add((dx,dy,dz)) == b_o`.
+    fn conform(&self, other: &Scanner) -> Option<(RelativeOrientation, (i32, i32, i32))> {
+        // Here, we're trying to look for a "hook".
+        for ro in RelativeOrientation::iter() {
+            for ref_s in &self.beacons {
+                for ref_o in &other.beacons {
+                    // Okay, what should we do here..?
+                }
+            }
+            // Do things here with ro
+        }
+
+        None
     }
 }
 
 pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+    let groups = vectors::group(lines);
+    let scanners: Result<Vec<Scanner>> = groups.into_iter().map(|g| Scanner::new(g)).collect();
+    let scanners = scanners.context("could not create scanners")?;
+
+    // Now, iterate all the scanners... There are 25 of them...
     unimplemented!()
 }
