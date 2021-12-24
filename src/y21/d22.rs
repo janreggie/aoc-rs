@@ -1,6 +1,7 @@
 use anyhow::{bail, Context, Result};
 use sscanf::scanf;
 
+#[derive(Debug)]
 struct Step {
     x: (i32, i32),
     y: (i32, i32),
@@ -108,16 +109,6 @@ impl NaiveCube {
     }
 }
 
-struct IntervalCube {
-    // oh my god
-}
-
-impl IntervalCube {
-    fn new() -> IntervalCube {
-        IntervalCube {}
-    }
-}
-
 pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     let steps: Result<Vec<Step>> = lines
         .iter()
@@ -135,7 +126,14 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     }
     let ans1 = cube.count_on();
 
-    // Part 2: Cube is represented by some weird struct I guess
+    // Part 2. In my 16GB RAM environment this crashes.
+    // TODO: Implement using intervals and whatever
+    let mut cube = NaiveCube::new(10000);
+    for step in &steps {
+        eprintln!("Running step {:?}", &step);
+        cube.run(step);
+    }
+    let ans2 = cube.count_on();
 
-    Ok((ans1.to_string(), String::from("unimplemented")))
+    Ok((ans1.to_string(), ans2.to_string()))
 }
