@@ -150,6 +150,115 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
             "1656",
             "195",
         ),
+        (
+            12,
+            "fs-end
+he-DX
+fs-he
+start-DX
+pj-DX
+end-zg
+zg-sl
+zg-pj
+pj-he
+RW-he
+fs-DX
+pj-RW
+zg-RW
+start-pj
+he-WI
+zg-he
+pj-fs
+start-RW
+",
+            "226",
+            "3509",
+        ),
+        (
+            12,
+            "start-A
+start-b
+A-c
+A-b
+b-d
+A-end
+b-end
+",
+            "10",
+            "36",
+        ),
+        (
+            13,
+            "6,10
+0,14
+9,10
+0,3
+10,4
+4,11
+6,0
+6,12
+4,1
+0,13
+10,12
+3,4
+3,0
+8,4
+1,10
+2,14
+8,10
+9,0
+
+fold along y=7
+fold along x=5
+",
+            "17",
+            "", // can't parse letters for now
+        ),
+        (
+            14,
+            "NNCB
+
+CH -> B
+HH -> N
+CB -> H
+NH -> C
+HB -> C
+HC -> B
+HN -> C
+NN -> C
+BH -> H
+NC -> B
+NB -> B
+BN -> B
+BB -> N
+BC -> B
+CC -> N
+CN -> C
+",
+            "1588",
+            "2188189693529",
+        ),
+        (
+            15,
+            "1163751742
+1381373672
+2136511328
+3694931569
+7463417111
+1319128137
+1359912421
+3125421639
+1293138521
+2311944581
+",
+            "40",
+            "315",
+        ),
+        (16, "8A004A801A8002F478", "16", ""),
+        (16, "A0016C880162017C3686B18A3D4780", "31", ""),
+        (16, "9C005AC2F8F0", "", "0"),
+        (16, "9C0141080250320F1802104A08", "", "1"),
+        (17, "target area: x=20..30, y=-10..-5", "45", "112"),
     ];
     for (day, input, ans1, ans2) in testcases {
         test_day(day, input, ans1, ans2);
@@ -159,8 +268,15 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
 fn test_day(day: u8, input: &str, ans1: &str, ans2: &str) {
     eprintln!("Testing day {}", day);
     let input = split(input);
-    let result = solver(day)(input).unwrap();
-    assert_eq!((String::from(ans1), String::from(ans2)), result);
+    let (r1, r2) = solver(day)(input).unwrap();
+    if ans1 != "" {
+        eprintln!("Checking if ans1 matches expected");
+        assert_eq!(ans1, r1);
+    }
+    if ans2 != "" {
+        eprintln!("Checking if ans2 matches expected");
+        assert_eq!(ans2, r2);
+    }
 }
 
 fn split(str: &str) -> Vec<String> {
