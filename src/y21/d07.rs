@@ -91,8 +91,9 @@ impl CrabPositions {
         // compared to the one below which is quadratic.
 
         let mut result = u32::MAX;
-        for pos in &self.positions {
-            let pos = *pos;
+        let lowest_pos = *self.positions.first().unwrap();
+        let highest_pos = *self.positions.last().unwrap();
+        for pos in lowest_pos..highest_pos + 1 {
             let current = self.compute_fuel_sq(pos);
             if current < result {
                 result = current
