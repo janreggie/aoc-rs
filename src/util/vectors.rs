@@ -30,13 +30,19 @@ where
 /// split_and_trim(" a b  c  d   "); // returns vec!["a","b","c","d"]
 /// ```
 ///
-pub fn split_and_trim(str: &str, delim: char) -> Vec<String>
-where
-{
+pub fn split_and_trim(str: &str, delim: char) -> Vec<String> {
     str.trim_matches(delim)
         .split(delim)
         .filter(|s| !s.is_empty())
         .map(|s| s.to_string())
+        .collect()
+}
+
+/// split_and_trim but doesn't allocate new strings.
+pub fn split_and_trim_borrowed(str: &str, delim: char) -> Vec<&str> {
+    str.trim_matches(delim)
+        .split(delim)
+        .filter(|s| !s.is_empty())
         .collect()
 }
 
