@@ -3,14 +3,14 @@ use anyhow::{bail, Context, Ok, Result};
 use crate::util::vectors;
 
 #[derive(Debug)]
-struct Knot {
+pub struct Knot {
     numbers: [u8; 256],
     position: usize,
     skip_size: usize,
 }
 
 impl Knot {
-    fn new() -> Knot {
+    pub fn new() -> Knot {
         let mut numbers = [0; 256];
         for ii in 0..256 {
             numbers[ii] = ii as u8;
@@ -23,7 +23,7 @@ impl Knot {
     }
 
     /// Twist a span of numbers from its internal position with length provided.
-    fn twist(&mut self, length: usize) {
+    pub fn twist(&mut self, length: usize) {
         // Swap the numbers across the length
         for ii in 0..length / 2 {
             let (lhs, rhs) = (self.position + ii, self.position + length - 1 - ii);
@@ -36,7 +36,7 @@ impl Knot {
         self.skip_size = (self.skip_size + 1) % 256;
     }
 
-    fn dense_hash(&self) -> [u8; 16] {
+    pub fn dense_hash(&self) -> [u8; 16] {
         let mut result = [0; 16];
         for ii in 0..256 {
             result[ii / 16] ^= self.numbers[ii];

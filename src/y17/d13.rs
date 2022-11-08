@@ -1,4 +1,4 @@
-use anyhow::{bail, Context, Ok, Result};
+use anyhow::{Context, Ok, Result};
 use num::Integer;
 use sscanf::scanf;
 
