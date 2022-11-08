@@ -27,13 +27,13 @@ struct Disk {
 impl Disk {
     fn new(key: &str) -> Disk {
         let mut grid = [[false; 128]; 128];
-        for ii in 0..128 {
-            let row_input = format!("{}-{}", key, ii);
+        for row in 0..128 {
+            let row_input = format!("{}-{}", key, row);
             let row_hash = knot_hash(&row_input);
-            for jj in 0..16 {
-                for kk in 0..8 {
-                    let bb = row_hash[jj] & (1 << (7 - kk)) != 0;
-                    grid[ii][jj * 8 + kk] = bb;
+            for ii in 0..16 {
+                for bb in 0..8 {
+                    let is_bit_set = row_hash[ii] & (1 << (7 - bb)) != 0;
+                    grid[row][ii * 8 + bb] = is_bit_set;
                 }
             }
         }
