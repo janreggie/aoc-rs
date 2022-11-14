@@ -7,11 +7,13 @@ const MOD: u64 = (1 << 31) - 1;
 const MASK: u64 = 0xFFFF;
 
 fn next(n: u64, f: u64) -> u64 {
-    (n * f) % MOD
+    // (n * f) % MOD
 
-    // TODO: Why doesn't the following work?
-    // n = n*f;
-    // (n >> 31) + (n & MOD)
+    // TODO: An explanation on why this works
+    let n = n * f;
+    let n = (n >> 31) + (n & MOD);
+    let n = (n >> 31) + (n & MOD);
+    n
 }
 
 fn next2(n: u64, f: u64, mask: u64) -> u64 {
