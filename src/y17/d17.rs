@@ -23,6 +23,34 @@ impl Spinlock {
     }
 }
 
+#[derive(Debug)]
+struct SpinlockAtZero {
+    steps_per_input: usize,
+    next_to_zero: usize,
+    length: usize,
+    ind: usize,
+}
+
+impl SpinlockAtZero {
+    fn new(steps_per_input: usize) -> Self {
+        SpinlockAtZero {
+            steps_per_input,
+            next_to_zero: 1,
+            length: 2,
+            ind: 1,
+        }
+    }
+
+    fn next(&mut self) {
+        let next_ind = (self.ind + self.steps_per_input) % self.length + 1;
+        if next_ind == 1 {
+            self.next_to_zero = self.length; // what should be added
+        }
+        self.length += 1;
+        self.ind = next_ind;
+    }
+}
+
 pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     if lines.len() != 1 {
         bail!("expected 1 line as input, got {} instead", lines.len())
@@ -33,30 +61,6 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
         .unwrap()
         .parse::<usize>()
         .context("could not read input as usize")?;
-
-    let mut spinlock = Spinlock::new(input);
-    for _ in 0..30 {
-        spinlock.next();
-        print!(
-            "ind {:2} len {:2} ",
-            spinlock.ind,
-            spinlock.buffer.len() - 1
-        );
-        println!(
-            "{:?}",
-            spinlock
-                .buffer
-                .iter()
-                .enumerate()
-                .map(|(i, n)| if i == spinlock.ind {
-                    format!("({})", *n)
-                } else {
-                    format!("{}", *n)
-                })
-                .collect::<Vec<_>>()
-        );
-    }
-    todo!();
 
     // Part 1: After 2017 iterations
     let mut spinlock = Spinlock::new(input);
@@ -70,12 +74,15 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
         .unwrap_or(spinlock.buffer[0])
         .to_string();
 
-    // Part 2: After 50 million
-    let mut spinlock = Spinlock::new(input);
-    for _ in 0..50_0000 {
+    // Part 2: After 50 million.
+    // Consider that either the new value gets inserted *somewhere*
+    // (and we don't really care where it is),
+    // or it gets inserted immediately after zero.
+    let mut spinlock = SpinlockAtZero::new(input);
+    while spinlock.length <= 50_000_000 {
         spinlock.next();
     }
-    let ans2 = spinlock.buffer[1].to_string();
+    let ans2 = spinlock.next_to_zero.to_string();
 
     Ok((ans1, ans2))
 }
