@@ -1,9 +1,9 @@
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 
 use crate::util::vectors::{from_strs, group};
 
 pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
-    let mut calories: Vec<u32> = group(lines)
+    let calories: Vec<u32> = group(lines)
         .iter()
         .map(|lines| from_strs::<u32>(lines))
         .collect::<Result<Vec<_>>>()
@@ -11,17 +11,23 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
         .iter()
         .map(|cals| cals.iter().sum())
         .collect();
+    if calories.len() < 3 {
+        bail!("input too short")
+    }
 
     // Part 1: Maximum number of calories
-    let ans1 = calories
-        .iter()
-        .max()
-        .context("calories are empty")?
-        .to_string();
+    let ans1 = calories.iter().max().unwrap().to_string();
 
     // Part 2: Top three maximum number of calories
-    calories.sort_by(|a, b| b.cmp(a));
-    let ans2 = calories.iter().take(3).sum::<u32>().to_string();
+    let mut highest = [calories[0], calories[1], calories[2]];
+    highest.sort();
+    for &vv in &calories {
+        if vv > highest[0] {
+            highest[0] = vv;
+            highest.sort();
+        }
+    }
+    let ans2 = highest.iter().sum::<u32>().to_string();
 
     Ok((ans1, ans2))
 }
