@@ -6,6 +6,7 @@ mod d03;
 mod d04;
 mod d05;
 mod d06;
+mod d07;
 
 pub fn solver(day: u8) -> fn(Vec<String>) -> Result<(String, String)> {
     match day {
@@ -15,6 +16,7 @@ pub fn solver(day: u8) -> fn(Vec<String>) -> Result<(String, String)> {
         4 => d04::solve,
         5 => d05::solve,
         6 => d06::solve,
+        7 => d07::solve,
         _ => todo!("day {}", day),
     }
 }
