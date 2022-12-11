@@ -46,14 +46,18 @@ impl fmt::Debug for Folder {
 
 #[derive(Debug)]
 struct File {
-    name: String,
+    _name: String,
     size: u32,
-    parent: Rc<RefCell<Folder>>,
+    _parent: Rc<RefCell<Folder>>,
 }
 
 impl File {
     fn new(name: String, size: u32, parent: Rc<RefCell<Folder>>) -> File {
-        File { name, size, parent }
+        File {
+            _name: name,
+            size,
+            _parent: parent,
+        }
     }
 }
 
