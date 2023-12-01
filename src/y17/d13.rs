@@ -64,7 +64,7 @@ impl Firewall {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let mut firewall = Firewall::new();
     let layers = lines
         .iter()
@@ -79,13 +79,13 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     }
 
     // Part 1: Severity at zero delays
-    let ans1 = firewall.severity(0).to_string();
+    let ans1 = Ok(firewall.severity(0).to_string());
 
     // Part 2: Lowest delay without getting caught
-    let ans2 = firewall
+    let ans2 = Ok(firewall
         .ideal_delay()
         .context("firewall cannot be bypassed")?
-        .to_string();
+        .to_string());
 
     Ok((ans1, ans2))
 }

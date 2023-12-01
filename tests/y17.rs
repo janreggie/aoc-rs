@@ -25,17 +25,14 @@ fn test_day(day: u8, input: &str, ans1: &str, ans2: &str) {
     let (r1, r2) = solver(day)(input).unwrap();
     if ans1 != "" {
         eprintln!("Checking if ans1 matches expected");
-        assert_eq!(ans1, r1);
+        assert_eq!(ans1, r1.unwrap());
     }
     if ans2 != "" {
         eprintln!("Checking if ans2 matches expected");
-        assert_eq!(ans2, r2);
+        assert_eq!(ans2, r2.unwrap());
     }
 }
 
 fn split(str: &str) -> Vec<String> {
-    str.trim_matches('\n')
-        .split('\n')
-        .map(|s| s.to_string())
-        .collect()
+    str.trim_matches('\n').split('\n').map(|s| s.to_string()).collect()
 }

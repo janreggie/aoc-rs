@@ -86,7 +86,7 @@ fn syntax_error_score(line: &str) -> Result<(ChunkType, u128)> {
     Ok((ChunkType::Incomplete, score))
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     // Two birds in one stone.
     // Or, two parts in one `for` loop.
     let mut ans1 = 0;
@@ -95,15 +95,19 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
         match syntax_error_score(&line) {
             Ok((ChunkType::Corrupted, score)) => ans1 += score,
             Ok((ChunkType::Incomplete, score)) => ans2_scores.push(score),
-            Err(e) => bail!(e.context(format!("could not parse line `{}`", line))),
+            Err(e) => {
+                bail!(e.context(format!("could not parse line `{}`", line)))
+            }
         }
     }
+    let ans1 = Ok(ans1.to_string());
 
     // Because ans2 requires the *middle* value
     ans2_scores.sort();
     let ans2 = ans2_scores
         .get(ans2_scores.len() / 2)
         .context("no incomplete scores")?;
+    let ans2 = Ok(ans2.to_string());
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

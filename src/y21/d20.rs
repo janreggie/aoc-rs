@@ -68,13 +68,7 @@ impl Image {
             image.push(row.context("could not parse some character")?);
         }
 
-        Ok(Image {
-            enhancement_algorithm,
-            image,
-            space: false,
-            width,
-            height,
-        })
+        Ok(Image { enhancement_algorithm, image, space: false, width, height })
     }
 
     /// Determine what the value at some pixel (x,y) will be for the *enhanced* image.
@@ -141,10 +135,7 @@ impl Image {
     }
 
     fn count_lit(&self) -> usize {
-        self.image
-            .iter()
-            .map(|row| row.iter().filter(|b| **b).count())
-            .sum()
+        self.image.iter().map(|row| row.iter().filter(|b| **b).count()).sum()
     }
 }
 
@@ -160,20 +151,20 @@ impl fmt::Display for Image {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let mut image = Image::new(lines).context("could not create image")?;
 
     // Part 1: First two times
     for _ in 0..2 {
         image.enhance();
     }
-    let ans1 = image.count_lit();
+    let ans1 = Ok(image.count_lit().to_string());
 
     // Part 2: Okay, let's do it 48 more times
     for _ in 0..48 {
         image.enhance();
     }
-    let ans2 = image.count_lit();
+    let ans2 = Ok(image.count_lit().to_string());
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

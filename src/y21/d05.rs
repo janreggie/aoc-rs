@@ -58,8 +58,10 @@ impl Line {
             bail!("could not split points");
         }
 
-        let p1 = Point::new(points[0]).context("could not parse first point")?;
-        let p2 = Point::new(points[1]).context("could not parse seconod popint")?;
+        let p1 =
+            Point::new(points[0]).context("could not parse first point")?;
+        let p2 =
+            Point::new(points[1]).context("could not parse seconod popint")?;
         Ok(Line(p1, p2))
     }
 
@@ -144,10 +146,11 @@ impl fmt::Display for Grid {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let mut ls = Vec::new();
     for line in lines {
-        let ll = Line::new(&line).context(format!("could not read line `{}`", line))?;
+        let ll = Line::new(&line)
+            .context(format!("could not read line `{}`", line))?;
         ls.push(ll);
     }
     let lines = ls;
@@ -159,14 +162,14 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
             grid.draw(line);
         }
     }
-    let ans1 = grid.count_intersections();
+    let ans1 = Ok(grid.count_intersections().to_string());
 
     // Part 2: All the points
     grid.clear();
     for line in &lines {
         grid.draw(line);
     }
-    let ans2 = grid.count_intersections();
+    let ans2 = Ok(grid.count_intersections().to_string());
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

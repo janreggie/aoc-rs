@@ -2,7 +2,7 @@ use anyhow::{bail, Context, Result};
 
 use crate::util::vectors::{from_strs, group};
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let calories: Vec<u32> = group(lines)
         .iter()
         .map(|lines| from_strs::<u32>(lines))
@@ -16,7 +16,7 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     }
 
     // Part 1: Maximum number of calories
-    let ans1 = calories.iter().max().unwrap().to_string();
+    let ans1 = Ok(calories.iter().max().unwrap().to_string());
 
     // Part 2: Top three maximum number of calories
     let mut highest = [calories[0], calories[1], calories[2]];
@@ -27,7 +27,7 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
             highest.sort();
         }
     }
-    let ans2 = highest.iter().sum::<u32>().to_string();
+    let ans2 = Ok(highest.iter().sum::<u32>().to_string());
 
     Ok((ans1, ans2))
 }

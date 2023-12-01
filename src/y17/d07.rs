@@ -47,7 +47,8 @@ impl ProgramGraph {
         let mut children = vec![vec![]; length];
         for (parent_name, children_names) in children_map {
             let parent_ind = name_to_ind[&parent_name];
-            let children_inds: Vec<_> = children_names.iter().map(|s| name_to_ind[s]).collect();
+            let children_inds: Vec<_> =
+                children_names.iter().map(|s| name_to_ind[s]).collect();
             children[parent_ind] = children_inds;
         }
 
@@ -67,13 +68,7 @@ impl ProgramGraph {
             .next()
             .context("invalid graph: could not get root index")?;
 
-        Ok(ProgramGraph {
-            length,
-            names,
-            weights,
-            children,
-            bottom_ind,
-        })
+        Ok(ProgramGraph { length, names, weights, children, bottom_ind })
     }
 
     /// Returns the weights of the programs and all programs above itself
@@ -86,7 +81,8 @@ impl ProgramGraph {
             weights: &Vec<u32>,
         ) -> u32 {
             for child in &children[ind] {
-                cum_weights[ind] += populate_weights(*child, cum_weights, children, weights);
+                cum_weights[ind] +=
+                    populate_weights(*child, cum_weights, children, weights);
             }
             cum_weights[ind] += weights[ind];
             cum_weights[ind]
@@ -115,10 +111,14 @@ impl ProgramGraph {
             if inds.len() == 0 {
                 return None;
             }
-            let weights: Vec<_> = inds.iter().map(|&ii| cum_weights[ii]).collect();
+            let weights: Vec<_> =
+                inds.iter().map(|&ii| cum_weights[ii]).collect();
             if let Some(weird_index) = odd_one_out_index(&weights) {
-                let investigating_weird =
-                    get_weird_one_out(&children[inds[weird_index]], cum_weights, children);
+                let investigating_weird = get_weird_one_out(
+                    &children[inds[weird_index]],
+                    cum_weights,
+                    children,
+                );
                 Some(investigating_weird.unwrap_or((inds, weird_index)))
             } else {
                 None
@@ -143,16 +143,19 @@ impl ProgramGraph {
 
         (
             offending_program_ind,
-            self.weights[offending_program_ind] + normal_cum_weight - offending_cum_weight,
+            self.weights[offending_program_ind] + normal_cum_weight
+                - offending_cum_weight,
         )
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
-    let program_graph = ProgramGraph::new(&lines).context("could not create program graph")?;
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
+    let program_graph =
+        ProgramGraph::new(&lines).context("could not create program graph")?;
 
-    let ans1 = program_graph.names[program_graph.bottom_ind].clone();
+    let ans1 = Ok(program_graph.names[program_graph.bottom_ind].clone());
     let (_, ans2) = program_graph.offending_program();
-    let ans2 = ans2.to_string();
+    let ans2 = Ok(ans2.to_string());
+
     Ok((ans1, ans2))
 }

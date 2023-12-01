@@ -8,7 +8,7 @@ fn sort_string(s: &String) -> String {
     String::from_iter(chars)
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let passphrases = lines;
 
     // Number of valid passphrases for parts 1 and 2 respectively
@@ -37,7 +37,8 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
         }
     }
 
-    let ans1 = valid_passphrases_1.to_string();
-    let ans2 = valid_passphrases_2.to_string();
+    let ans1 = Ok(valid_passphrases_1.to_string());
+    let ans2 = Ok(valid_passphrases_2.to_string());
+
     Ok((ans1, ans2))
 }

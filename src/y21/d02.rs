@@ -19,24 +19,29 @@ impl Instruction {
             );
         }
 
-        let count: u32 = split[1]
-            .parse()
-            .context(format!("could not format count `{}` as integer", split[1]))?;
+        let count: u32 = split[1].parse().context(format!(
+            "could not format count `{}` as integer",
+            split[1]
+        ))?;
 
         match split[0].as_str() {
             "forward" => Ok(Instruction::Forward(count)),
             "down" => Ok(Instruction::Down(count)),
             "up" => Ok(Instruction::Up(count)),
-            _ => bail!("could not interpret instruction `{}` properly", split[0]),
+            _ => {
+                bail!("could not interpret instruction `{}` properly", split[0])
+            }
         }
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let mut instrs = Vec::new();
     for line in lines {
-        let instr = Instruction::new(&line)
-            .context(format!("could not parse instruction of line `{}`", line))?;
+        let instr = Instruction::new(&line).context(format!(
+            "could not parse instruction of line `{}`",
+            line
+        ))?;
         instrs.push(instr);
     }
 
@@ -50,7 +55,7 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
             Instruction::Up(c) => vertical -= c,
         }
     }
-    let ans1 = horizontal * vertical;
+    let ans1 = Ok((horizontal * vertical).to_string());
 
     // Part 2: Something about "aim"
     let mut horizontal: u32 = 0;
@@ -66,7 +71,7 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
             Instruction::Up(c) => aim -= c,
         }
     }
-    let ans2 = horizontal * vertical;
+    let ans2 = Ok((horizontal * vertical).to_string());
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

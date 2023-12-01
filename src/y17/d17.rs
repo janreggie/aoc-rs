@@ -9,15 +9,12 @@ struct Spinlock {
 
 impl Spinlock {
     fn new(steps_per_input: usize) -> Spinlock {
-        Spinlock {
-            steps_per_input,
-            buffer: vec![0],
-            ind: 0,
-        }
+        Spinlock { steps_per_input, buffer: vec![0], ind: 0 }
     }
 
     fn next(&mut self) {
-        let next_ind = (self.ind + self.steps_per_input) % self.buffer.len() + 1;
+        let next_ind =
+            (self.ind + self.steps_per_input) % self.buffer.len() + 1;
         self.buffer.insert(next_ind, self.buffer.len());
         self.ind = next_ind;
     }
@@ -33,12 +30,7 @@ struct SpinlockAtZero {
 
 impl SpinlockAtZero {
     fn new(steps_per_input: usize) -> Self {
-        SpinlockAtZero {
-            steps_per_input,
-            next_to_zero: 1,
-            length: 2,
-            ind: 1,
-        }
+        SpinlockAtZero { steps_per_input, next_to_zero: 1, length: 2, ind: 1 }
     }
 
     fn next(&mut self) {
@@ -51,7 +43,7 @@ impl SpinlockAtZero {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     if lines.len() != 1 {
         bail!("expected 1 line as input, got {} instead", lines.len())
     }
@@ -73,16 +65,14 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
         .cloned()
         .unwrap_or(spinlock.buffer[0])
         .to_string();
+    let ans1 = Ok(ans1);
 
     // Part 2: After 50 million.
-    // Consider that either the new value gets inserted *somewhere*
-    // (and we don't really care where it is),
-    // or it gets inserted immediately after zero.
     let mut spinlock = SpinlockAtZero::new(input);
     while spinlock.length <= 50_000_000 {
         spinlock.next();
     }
-    let ans2 = spinlock.next_to_zero.to_string();
+    let ans2 = Ok(spinlock.next_to_zero.to_string());
 
     Ok((ans1, ans2))
 }

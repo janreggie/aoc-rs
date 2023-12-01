@@ -91,7 +91,9 @@ impl Packet {
         packet
     }
 
-    fn it(mut bits: std::slice::Iter<bool>) -> (Result<Packet>, std::slice::Iter<bool>) {
+    fn it(
+        mut bits: std::slice::Iter<bool>,
+    ) -> (Result<Packet>, std::slice::Iter<bool>) {
         if bits.len() == 0 {
             return (
                 Err(anyhow!("could not create a Packet with input of len 0")),
@@ -134,7 +136,8 @@ impl Packet {
                 for _ in 0..11 {
                     subpacket_count.push(*bits.next().unwrap_or(&false));
                 }
-                let subpacket_count = bits_to_literal(&subpacket_count) as usize;
+                let subpacket_count =
+                    bits_to_literal(&subpacket_count) as usize;
 
                 while subpackets.len() < subpacket_count {
                     let (subpacket, bb) = Packet::it(bits);
@@ -197,11 +200,7 @@ impl Packet {
             data = PacketData::Subpackets(subpackets);
         }
 
-        let packet = Packet {
-            version,
-            type_id,
-            data,
-        };
+        let packet = Packet { version, type_id, data };
         (Ok(packet), bits)
     }
 
@@ -209,7 +208,9 @@ impl Packet {
         self.version
             + match &self.data {
                 PacketData::Literal(_) => 0,
-                PacketData::Subpackets(vv) => vv.iter().map(|p| p.get_version_sum()).sum(),
+                PacketData::Subpackets(vv) => {
+                    vv.iter().map(|p| p.get_version_sum()).sum()
+                }
             }
     }
 
@@ -217,7 +218,8 @@ impl Packet {
         match &self.data {
             PacketData::Literal(v) => Ok(*v),
             PacketData::Subpackets(vv) => {
-                let vv: Result<Vec<u128>> = vv.iter().map(|p| p.value()).collect();
+                let vv: Result<Vec<u128>> =
+                    vv.iter().map(|p| p.value()).collect();
                 let vv = vv.context("could not evaluate subpackets")?;
 
                 let expect = |cmp: Ordering| {
@@ -235,7 +237,9 @@ impl Packet {
                     1 => Ok(vv.product()),
                     2 => Ok(*vv.min().context("zero subpackets")?),
                     3 => Ok(*vv.max().context("zero subpackets")?),
-                    4 => Err(anyhow!("PacketData should be Literal for type id 4")),
+                    4 => Err(anyhow!(
+                        "PacketData should be Literal for type id 4"
+                    )),
                     5 => expect(Ordering::Greater),
                     6 => expect(Ordering::Less),
                     7 => expect(Ordering::Equal),
@@ -255,17 +259,18 @@ enum PacketData {
     Subpackets(Vec<Packet>),
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     if lines.len() != 1 {
         bail!("expected only 1 line, got {} instead", lines.len())
     }
     let mut lines = lines;
     let input = lines.pop().unwrap();
     let bits = input_to_bits(&input).context("could not parse input")?;
-    let packet = Packet::new(&bits).context("could not create packet from input")?;
+    let packet =
+        Packet::new(&bits).context("could not create packet from input")?;
 
-    let ans1 = packet.get_version_sum();
-    let ans2 = packet.value().context("could not get value")?;
+    let ans1 = Ok(packet.get_version_sum().to_string());
+    let ans2 = Ok(packet.value().context("could not get value")?.to_string());
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

@@ -10,16 +10,19 @@ struct Village {
 impl Village {
     fn new(lines: Vec<String>) -> Result<Village> {
         fn line_to_pair(line: &str) -> Result<(usize, HashSet<usize>)> {
-            let (sender, recipients) =
-                scanf!(line, "{} <-> {}", usize, String).context("could not parse line")?;
+            let (sender, recipients) = scanf!(line, "{} <-> {}", usize, String)
+                .context("could not parse line")?;
             let recipients = recipients
                 .split(", ")
                 .map(|rr| {
-                    rr.parse::<usize>()
-                        .with_context(|| format!("could not parse {} to string", rr))
+                    rr.parse::<usize>().with_context(|| {
+                        format!("could not parse {} to string", rr)
+                    })
                 })
                 .collect::<Result<HashSet<_>>>()
-                .with_context(|| format!("could not parse line {} properly", line))?;
+                .with_context(|| {
+                    format!("could not parse line {} properly", line)
+                })?;
 
             Ok((sender, recipients))
         }
@@ -28,8 +31,10 @@ impl Village {
             .iter()
             .enumerate()
             .map(|(ii, line)| {
-                let (sender, recipients) = line_to_pair(line)
-                    .with_context(|| format!("could not parse line {} correctly", line))?;
+                let (sender, recipients) =
+                    line_to_pair(line).with_context(|| {
+                        format!("could not parse line {} correctly", line)
+                    })?;
                 if ii != sender {
                     bail!("line {} uses sender {}", ii, sender);
                 }
@@ -82,11 +87,11 @@ impl Village {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let village = Village::new(lines).context("could not parse to village")?;
 
     // Part 1: How many villages are connected to zero?
-    let ans1 = village.connected_to(0).to_string();
+    let ans1 = Ok(village.connected_to(0).to_string());
 
     // Part 2: How many groups are there?
     let mut groups: Vec<HashSet<_>> = vec![];
@@ -96,7 +101,7 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
             groups.push(village.group(program));
         }
     }
-    let ans2 = groups.len().to_string();
+    let ans2 = Ok(groups.len().to_string());
 
     Ok((ans1, ans2))
 }

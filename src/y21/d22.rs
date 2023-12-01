@@ -33,12 +33,7 @@ impl Step {
             vv => bail!("invalid instruction `{}`", vv),
         }
 
-        Ok(Step {
-            x: (x1, x2),
-            y: (y1, y2),
-            z: (z1, z2),
-            turn_on,
-        })
+        Ok(Step { x: (x1, x2), y: (y1, y2), z: (z1, z2), turn_on })
     }
 }
 
@@ -80,7 +75,12 @@ impl NaiveCube {
 
     fn is_in_bounds_pt(&self, x: i32, y: i32, z: i32) -> bool {
         let radius = self.radius as i32;
-        x >= -radius && x <= radius && y >= -radius && y <= radius && z >= -radius && z <= radius
+        x >= -radius
+            && x <= radius
+            && y >= -radius
+            && y <= radius
+            && z >= -radius
+            && z <= radius
     }
 
     fn is_in_bounds_step(&self, step: &Step) -> bool {
@@ -109,7 +109,7 @@ impl NaiveCube {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let steps: Result<Vec<Step>> = lines
         .iter()
         .map(|l| Step::new(l).context(format!("could not parse line `{}`", l)))
@@ -124,7 +124,7 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
         }
         cube.run(step);
     }
-    let ans1 = cube.count_on();
+    let ans1 = Ok(cube.count_on().to_string());
 
     // Part 2. In my 16GB RAM environment this crashes.
     // TODO: Implement using intervals and whatever
@@ -133,7 +133,7 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
         eprintln!("Running step {:?}", &step);
         cube.run(step);
     }
-    let ans2 = cube.count_on();
+    let ans2 = Ok(cube.count_on().to_string());
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

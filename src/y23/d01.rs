@@ -87,28 +87,30 @@ fn get_calibration_value(line: &str, use_words: bool) -> Option<u32> {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
-    // Part 1: Only consider digits
-    let calibration_values = lines
+fn get_calibration_value_sum(
+    lines: &Vec<String>,
+    use_words: bool,
+) -> Result<u32> {
+    Ok(lines
         .iter()
         .map(|line| {
-            get_calibration_value(line, false).with_context(|| {
+            get_calibration_value(line, use_words).with_context(|| {
                 format!("string {} does not contain words", line)
             })
         })
-        .collect::<Result<Vec<u32>>>()?;
-    let ans1 = calibration_values.iter().sum::<u32>().to_string();
+        .collect::<Result<Vec<u32>>>()?
+        .iter()
+        .sum::<u32>())
+}
+
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
+    // Part 1: Only consider digits
+    let ans1 = get_calibration_value_sum(&lines, false)
+        .map(|result| result.to_string());
 
     // Part 2: Now, consider the strings
-    let calibration_values = lines
-        .iter()
-        .map(|line| {
-            get_calibration_value(line, true).with_context(|| {
-                format!("string {} does not contain words", line)
-            })
-        })
-        .collect::<Result<Vec<u32>>>()?;
-    let ans2 = calibration_values.iter().sum::<u32>().to_string();
+    let ans2 = get_calibration_value_sum(&lines, true)
+        .map(|result| result.to_string());
 
     Ok((ans1, ans2))
 }

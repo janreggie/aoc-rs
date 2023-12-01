@@ -8,9 +8,10 @@ struct MemoryBlocks(Vec<u32>);
 
 impl MemoryBlocks {
     fn new(s: &String) -> Result<MemoryBlocks> {
-        let s: Vec<u32> =
-            vectors::from_strs(&s.split_ascii_whitespace().map(|s| s.to_string()).collect())
-                .context("could not parse input to MemoryBlocks")?;
+        let s: Vec<u32> = vectors::from_strs(
+            &s.split_ascii_whitespace().map(|s| s.to_string()).collect(),
+        )
+        .context("could not parse input to MemoryBlocks")?;
         Ok(MemoryBlocks(s))
     }
 
@@ -39,11 +40,12 @@ impl MemoryBlocks {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     if lines.len() != 1 {
         bail!("expects 1 line only, got {}", lines.len())
     }
-    let mut memory_blocks = MemoryBlocks::new(&lines[0]).context("erroneous input")?;
+    let mut memory_blocks =
+        MemoryBlocks::new(&lines[0]).context("erroneous input")?;
     let mut block_history = HashMap::new();
 
     // Part 1: Count the number of cycles before we start breaking
@@ -53,8 +55,8 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
         memory_blocks.redistribute();
         cycles += 1;
     }
-    let ans1 = cycles.to_string();
-    let ans2 = (cycles - block_history[&memory_blocks]).to_string();
+    let ans1 = Ok(cycles.to_string());
+    let ans2 = Ok((cycles - block_history[&memory_blocks]).to_string());
 
     Ok((ans1, ans2))
 }

@@ -6,7 +6,9 @@ use anyhow::Result;
 
 pub mod vectors;
 
-pub fn series(yr: u8) -> fn(u8) -> fn(Vec<String>) -> Result<(String, String)> {
+pub fn series(
+    yr: u8,
+) -> fn(u8) -> fn(Vec<String>) -> Result<(Result<String>, Result<String>)> {
     match yr {
         17 => y17::solver,
         21 => y21::solver,

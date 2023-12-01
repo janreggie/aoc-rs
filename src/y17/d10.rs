@@ -15,20 +15,18 @@ impl Knot {
         for ii in 0..256 {
             numbers[ii] = ii as u8;
         }
-        Knot {
-            numbers,
-            position: 0,
-            skip_size: 0,
-        }
+        Knot { numbers, position: 0, skip_size: 0 }
     }
 
     /// Twist a span of numbers from its internal position with length provided.
     pub fn twist(&mut self, length: usize) {
         // Swap the numbers across the length
         for ii in 0..length / 2 {
-            let (lhs, rhs) = (self.position + ii, self.position + length - 1 - ii);
+            let (lhs, rhs) =
+                (self.position + ii, self.position + length - 1 - ii);
             let (lhs, rhs) = (lhs % 256, rhs % 256);
-            (self.numbers[lhs], self.numbers[rhs]) = (self.numbers[rhs], self.numbers[lhs]);
+            (self.numbers[lhs], self.numbers[rhs]) =
+                (self.numbers[rhs], self.numbers[lhs]);
         }
 
         // Increment position and skip size
@@ -45,7 +43,7 @@ impl Knot {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     if lines.len() != 1 {
         bail!("expected only 1 line as input, got {}", lines.len())
     }
@@ -59,14 +57,12 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     for length in &lengths {
         knot.twist(*length);
     }
-    let ans1 = (knot.numbers[0] as u32 * knot.numbers[1] as u32).to_string();
+    let ans1 =
+        Ok((knot.numbers[0] as u32 * knot.numbers[1] as u32).to_string());
 
     // Part 2: Interpret input as ascii, with additional lengths, 64 times, etc.
-    let mut lengths = input
-        .as_bytes()
-        .iter()
-        .map(|x| *x as usize)
-        .collect::<Vec<_>>();
+    let mut lengths =
+        input.as_bytes().iter().map(|x| *x as usize).collect::<Vec<_>>();
     lengths.extend_from_slice(&[17, 31, 73, 47, 23]);
     let mut knot = Knot::new();
     for _ in 0..64 {
@@ -80,6 +76,7 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
         .map(|b| format!("{:02x}", b))
         .collect::<Vec<String>>()
         .join("");
+    let ans2 = Ok(ans2);
 
     Ok((ans1, ans2))
 }

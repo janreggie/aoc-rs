@@ -63,7 +63,7 @@ impl Direction {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     if lines.len() != 1 {
         bail!("expected only 1 line as input, got {}", lines.len())
     }
@@ -85,8 +85,8 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
             record_distance = distance;
         }
     }
-    let ans1 = hex_pos.manhattan().to_string();
-    let ans2 = record_distance.to_string();
+    let ans1 = Ok(hex_pos.manhattan().to_string());
+    let ans2 = Ok(record_distance.to_string());
 
     Ok((ans1, ans2))
 }

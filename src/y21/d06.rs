@@ -9,10 +9,7 @@ struct LanternfishCounts {
 
 impl LanternfishCounts {
     fn new(fish: &Vec<u32>) -> Result<LanternfishCounts> {
-        let mut result = LanternfishCounts {
-            day: 0,
-            counts: [0; 9],
-        };
+        let mut result = LanternfishCounts { day: 0, counts: [0; 9] };
         for ff in fish {
             if *ff <= 8 {
                 result.counts[*ff as usize] += 1;
@@ -46,30 +43,30 @@ impl LanternfishCounts {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     if lines.len() != 1 {
         bail!("expected number of lines to be 1, got {}", lines.len());
     }
 
     let init_counts = &lines[0];
     let init_counts = vectors::split_and_trim(init_counts, ',');
-    let init_counts: Vec<u32> =
-        vectors::from_strs(&init_counts).context("could not interpret input line")?;
+    let init_counts: Vec<u32> = vectors::from_strs(&init_counts)
+        .context("could not interpret input line")?;
 
-    let mut lanternfish_counts =
-        LanternfishCounts::new(&init_counts).context("could not create LanternfishCounts")?;
+    let mut lanternfish_counts = LanternfishCounts::new(&init_counts)
+        .context("could not create LanternfishCounts")?;
 
-    // Part 2: Up to 80 days
+    // Part 1: Up to 80 days
     while lanternfish_counts.day < 80 {
         lanternfish_counts.next();
     }
-    let ans1 = lanternfish_counts.count();
+    let ans1 = Ok(lanternfish_counts.count().to_string());
 
     // Part 2: Up to 256 days
     while lanternfish_counts.day < 256 {
         lanternfish_counts.next();
     }
-    let ans2 = lanternfish_counts.count();
+    let ans2 = Ok(lanternfish_counts.count().to_string());
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

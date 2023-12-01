@@ -59,7 +59,7 @@ impl Player {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let tokens = lines
         .iter()
         .map(|line| {
@@ -92,8 +92,8 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
             (Opponent::C, Player::Y) => 2 + 0,
             (Opponent::C, Player::Z) => 3 + 3,
         })
-        .sum::<u32>()
-        .to_string();
+        .sum::<u32>();
+    let ans1 = Ok(ans1.to_string());
 
     // Part 2: X you lose, Y you draw, Z you win
     let ans2 = tokens
@@ -109,8 +109,8 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
             (Opponent::C, Player::Y) => 3 + 3,
             (Opponent::C, Player::Z) => 1 + 6,
         })
-        .sum::<u32>()
-        .to_string();
+        .sum::<u32>();
+    let ans2 = Ok(ans2.to_string());
 
     Ok((ans1, ans2))
 }

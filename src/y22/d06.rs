@@ -20,10 +20,7 @@ fn get_unique_span(bytes: &[u8], length: usize) -> Option<usize> {
     for ii in 0..length {
         let b = bytes[ii];
         if marked_bytes[byte_to_usize(b)] {
-            duplicate_bytes
-                .entry(b)
-                .and_modify(|c| *c += 1)
-                .or_insert(1);
+            duplicate_bytes.entry(b).and_modify(|c| *c += 1).or_insert(1);
         }
         marked_bytes[byte_to_usize(b)] = true;
     }
@@ -60,7 +57,7 @@ fn get_unique_span(bytes: &[u8], length: usize) -> Option<usize> {
     None
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     if lines.len() != 1 {
         bail!("expected input to be of length 1, got {}", lines.len())
     }
@@ -70,12 +67,12 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
         bail!("input too short")
     }
 
-    let ans1 = get_unique_span(input, 4)
+    let ans1 = Ok(get_unique_span(input, 4)
         .context("could not get start of packet marker")?
-        .to_string();
-    let ans2 = get_unique_span(input, 14)
+        .to_string());
+    let ans2 = Ok(get_unique_span(input, 14)
         .context("could not get start of message marker")?
-        .to_string();
+        .to_string());
 
     Ok((ans1, ans2))
 }

@@ -73,22 +73,17 @@ mod tests {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     if lines.len() != 1 {
         bail!("expect there to be 1 line, got {}", lines.len())
     }
     let mut lines = lines;
     let input = lines.pop().unwrap();
-    let (x1, x2, y1, y2) = scanf!(
-        &input,
-        "target area: x={}..{}, y={}..{}",
-        i32,
-        i32,
-        i32,
-        i32
-    )
-    .context("unable to parse input")?;
-    let target_area = TargetArea::new(x1, x2, y1, y2).context("could not create target area")?;
+    let (x1, x2, y1, y2) =
+        scanf!(&input, "target area: x={}..{}, y={}..{}", i32, i32, i32, i32)
+            .context("unable to parse input")?;
+    let target_area = TargetArea::new(x1, x2, y1, y2)
+        .context("could not create target area")?;
 
     // Most number of rounds can be achieved by setting some vx
     // such that Triangle(vx) is between x1 and x2.
@@ -106,8 +101,8 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
             }
         }
     }
-    let ans1 = record_height;
-    let ans2 = count_velocities;
+    let ans1 = Ok(record_height.to_string());
+    let ans2 = Ok(count_velocities.to_string());
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

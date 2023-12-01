@@ -3,31 +3,30 @@ use aoc_rs::y23::solver;
 #[test]
 fn test_y23() {
     let testcases = vec![
-            // TODO: How to make sure test still works for the following?
-            //         (
-            //             1,
-            //             "1abc2
-            // pqr3stu8vwx
-            // a1b2c3d4e5f
-            // treb7uchet
-            // ",
-            //             "142",
-            //             "",
-            //         ),
-    //         (
-    //             1,
-    //             "two1nine
-    // eightwothree
-    // abcone2threexyz
-    // xtwone3four
-    // 4nineeightseven2
-    // zoneight234
-    // 7pqrstsixteen
-    // ",
-    //             "",
-    //             "281",
-    //         ),
-        ];
+        (
+            1,
+            "1abc2
+pqr3stu8vwx
+a1b2c3d4e5f
+treb7uchet
+",
+            "142",
+            "",
+        ),
+        (
+            1,
+            "two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen
+",
+            "",
+            "281",
+        ),
+    ];
     for (day, input, ans1, ans2) in testcases {
         test_day(day, input, ans1, ans2);
     }
@@ -39,11 +38,11 @@ fn test_day(day: u8, input: &str, ans1: &str, ans2: &str) {
     let (r1, r2) = solver(day)(input).unwrap();
     if ans1 != "" {
         eprintln!("Checking if ans1 matches expected");
-        assert_eq!(ans1, r1);
+        assert_eq!(ans1, r1.unwrap());
     }
     if ans2 != "" {
         eprintln!("Checking if ans2 matches expected");
-        assert_eq!(ans2, r2);
+        assert_eq!(ans2, r2.unwrap());
     }
 }
 

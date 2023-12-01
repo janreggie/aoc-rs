@@ -16,12 +16,7 @@ struct Folder {
 
 impl Folder {
     fn new(name: String, parent: Option<Rc<RefCell<Folder>>>) -> Folder {
-        Folder {
-            name,
-            contents: vec![],
-            parent,
-            computed_size: 0,
-        }
+        Folder { name, contents: vec![], parent, computed_size: 0 }
     }
 
     fn add(&mut self, node: Node) {
@@ -53,11 +48,7 @@ struct File {
 
 impl File {
     fn new(name: String, size: u32, parent: Rc<RefCell<Folder>>) -> File {
-        File {
-            _name: name,
-            size,
-            _parent: parent,
-        }
+        File { _name: name, size, _parent: parent }
     }
 }
 
@@ -92,9 +83,9 @@ impl Line {
             return Ok(Line::LsOut(LsOut::Dir(args[1].to_string())));
         }
 
-        let size = args[0]
-            .parse::<u32>()
-            .with_context(|| format!("could not interpret size in line `{}`", line))?;
+        let size = args[0].parse::<u32>().with_context(|| {
+            format!("could not interpret size in line `{}`", line)
+        })?;
         return Ok(Line::LsOut(LsOut::File(args[1].to_string(), size)));
     }
 }
@@ -119,7 +110,10 @@ fn parse(input: Vec<String>) -> Result<Rc<RefCell<Folder>>> {
     let root = Rc::new(RefCell::new(Folder::new(String::from("/"), None)));
     let input = input
         .iter()
-        .map(|line| Line::new(line).with_context(|| format!("could not parse line {}", line)))
+        .map(|line| {
+            Line::new(line)
+                .with_context(|| format!("could not parse line {}", line))
+        })
         .collect::<Result<Vec<Line>>>()?;
     let mut current_folder = Rc::clone(&root);
     for line in &input {
@@ -141,11 +135,16 @@ fn parse(input: Vec<String>) -> Result<Rc<RefCell<Folder>>> {
                         }
                         CdParam::Name(name) => {
                             let mut next_folder = None;
-                            for node in &current_folder.as_ref().borrow().contents {
+                            for node in
+                                &current_folder.as_ref().borrow().contents
+                            {
                                 match node {
                                     Node::Folder(folder) => {
-                                        if &folder.as_ref().borrow().name == name {
-                                            next_folder = Some(Rc::clone(folder));
+                                        if &folder.as_ref().borrow().name
+                                            == name
+                                        {
+                                            next_folder =
+                                                Some(Rc::clone(folder));
                                             break;
                                         }
                                     }
@@ -164,15 +163,19 @@ fn parse(input: Vec<String>) -> Result<Rc<RefCell<Folder>>> {
             }
             Line::LsOut(ls_out) => {
                 let next_child = match ls_out {
-                    LsOut::Dir(name) => Node::Folder(Rc::new(RefCell::new(Folder::new(
-                        name.to_string(),
-                        Some(current_folder.clone()),
-                    )))),
-                    LsOut::File(name, size) => Node::File(Rc::new(RefCell::new(File::new(
-                        name.to_string(),
-                        *size,
-                        current_folder.clone(),
-                    )))),
+                    LsOut::Dir(name) => {
+                        Node::Folder(Rc::new(RefCell::new(Folder::new(
+                            name.to_string(),
+                            Some(current_folder.clone()),
+                        ))))
+                    }
+                    LsOut::File(name, size) => {
+                        Node::File(Rc::new(RefCell::new(File::new(
+                            name.to_string(),
+                            *size,
+                            current_folder.clone(),
+                        ))))
+                    }
                 };
                 current_folder.as_ref().borrow_mut().add(next_child);
             }
@@ -216,7 +219,7 @@ fn compute_sizes(node: &mut Node) -> u32 {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let root_folder = parse(lines).context("could not parse input properly")?;
     compute_sizes(&mut Node::Folder(Rc::clone(&root_folder)));
 
@@ -234,24 +237,27 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
             }
         }
     }
-    let ans1 = traverse(Rc::clone(&root_folder), &add_node_to_sum, 0).to_string();
+    let ans1 = traverse(Rc::clone(&root_folder), &add_node_to_sum, 0);
+    let ans1 = Ok(ans1.to_string());
 
     // Part 2: Find the smallest directory that, if deleted, will ensure root uses at most 40_000_000
     let total_size = root_folder.as_ref().borrow().computed_size;
     let delete_at_least = total_size - 40_000_000;
-    let consider_node_to_delete = |node: &Node, previous_candidate: u32| -> u32 {
-        if let Node::Folder(folder) = node {
-            let size = folder.as_ref().borrow().computed_size;
-            if size >= delete_at_least && size < previous_candidate {
-                size
+    let consider_node_to_delete =
+        |node: &Node, previous_candidate: u32| -> u32 {
+            if let Node::Folder(folder) = node {
+                let size = folder.as_ref().borrow().computed_size;
+                if size >= delete_at_least && size < previous_candidate {
+                    size
+                } else {
+                    previous_candidate
+                }
             } else {
                 previous_candidate
             }
-        } else {
-            previous_candidate
-        }
-    };
-    let ans2 = traverse(root_folder, &consider_node_to_delete, total_size).to_string();
+        };
+    let ans2 = traverse(root_folder, &consider_node_to_delete, total_size);
+    let ans2 = Ok(ans2.to_string());
 
     Ok((ans1, ans2))
 }

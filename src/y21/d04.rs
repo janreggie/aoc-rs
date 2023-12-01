@@ -18,10 +18,8 @@ impl BingoCard {
             );
         }
 
-        let mut result = BingoCard {
-            nums: Vec::new(),
-            shaded: vec![vec![false; 5]; 5],
-        };
+        let mut result =
+            BingoCard { nums: Vec::new(), shaded: vec![vec![false; 5]; 5] };
         for line in lines {
             let row = vectors::split_and_trim(line, ' ');
             let row = vectors::from_strs::<u32>(&row)
@@ -113,14 +111,12 @@ struct BingoCards {
 
 impl BingoCards {
     fn new(groups: &Vec<Vec<String>>) -> Result<BingoCards> {
-        let mut result = BingoCards {
-            cards: Vec::new(),
-            lookup: HashMap::new(),
-        };
+        let mut result =
+            BingoCards { cards: Vec::new(), lookup: HashMap::new() };
 
         for group in groups {
-            let card =
-                BingoCard::new(group).context(format!("could not interpret group {:?}", group))?;
+            let card = BingoCard::new(group)
+                .context(format!("could not interpret group {:?}", group))?;
 
             // Update lookup to include items from cards
             for row in &card.nums {
@@ -177,7 +173,7 @@ impl BingoCards {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let mut groups = vectors::group(lines);
     if groups.len() < 2 {
         bail!("input must have at least two groups of continguous lines");
@@ -192,8 +188,8 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     let bingo_numbers = vectors::from_strs::<u32>(&bingo_numbers)
         .context("could not format bingo nunmbers properly")?;
 
-    let mut bingo_cards =
-        BingoCards::new(&groups).context("could not format bingo cards properly")?;
+    let mut bingo_cards = BingoCards::new(&groups)
+        .context("could not format bingo cards properly")?;
 
     // Part 1: First to win
     let mut ans1 = 0;
@@ -204,6 +200,7 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
             break;
         }
     }
+    let ans1 = Ok(ans1.to_string());
 
     // Part 2: Last to win
     bingo_cards.clear();
@@ -225,6 +222,7 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
             }
         }
     }
+    let ans2 = Ok(ans2.to_string());
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

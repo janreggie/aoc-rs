@@ -106,7 +106,7 @@ impl CrabPositions {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     if lines.len() != 1 {
         bail!("expected lines to be of length 1, got {}", lines.len());
     }
@@ -115,7 +115,7 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
         .context("could not parse crab positions as vector of u32")?;
     let crab_positions = CrabPositions::new(crab_positions)?;
 
-    let ans1 = crab_positions.find_ideal_lin();
-    let ans2 = crab_positions.find_ideal_sq();
-    Ok((ans1.to_string(), ans2.to_string()))
+    let ans1 = Ok(crab_positions.find_ideal_lin().to_string());
+    let ans2 = Ok(crab_positions.find_ideal_sq().to_string());
+    Ok((ans1, ans2))
 }

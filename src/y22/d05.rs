@@ -39,7 +39,8 @@ impl Stacks {
         }
 
         // Check the final string to see how many crates are there...
-        let column_count = input.last().unwrap().split_ascii_whitespace().count();
+        let column_count =
+            input.last().unwrap().split_ascii_whitespace().count();
         let mut crates = vec![Vec::new(); column_count];
 
         // Now populate the crates
@@ -91,7 +92,9 @@ impl Stacks {
     }
 
     fn validate_instr(&self, instruction: &Instruction) -> Result<()> {
-        if instruction.from > self.crates.len() || instruction.to > self.crates.len() {
+        if instruction.from > self.crates.len()
+            || instruction.to > self.crates.len()
+        {
             bail!("invalid instruction {:?}", instruction);
         }
         let from_len = self.crates[instruction.from - 1].len();
@@ -116,7 +119,37 @@ impl Stacks {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+fn solve_part_1(
+    initial_stacks: &Vec<String>,
+    instructions: &Vec<Instruction>,
+) -> Result<String> {
+    let mut stacks =
+        Stacks::new(&initial_stacks).context("could not generate stacks")?;
+    for instruction in instructions {
+        stacks.perform(instruction).with_context(|| {
+            format!("could not perform instruction {:?}", instruction)
+        })?;
+    }
+
+    Ok(stacks.top_of_each())
+}
+
+fn solve_part_2(
+    initial_stacks: &Vec<String>,
+    instructions: &Vec<Instruction>,
+) -> Result<String> {
+    let mut stacks =
+        Stacks::new(&initial_stacks).context("could not generate stacks")?;
+    for instruction in instructions {
+        stacks.perform_quickly(instruction).with_context(|| {
+            format!("could not perform instruction {:?}", instruction)
+        })?;
+    }
+
+    Ok(stacks.top_of_each())
+}
+
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let input = group(lines);
     if input.len() != 2 {
         bail!(
@@ -131,29 +164,15 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
         .unwrap()
         .iter()
         .map(|instr| {
-            Instruction::new(instr)
-                .with_context(|| format!("could not parse {} as instruction", instr))
+            Instruction::new(instr).with_context(|| {
+                format!("could not parse {} as instruction", instr)
+            })
         })
         .collect::<Result<Vec<_>>>()
         .context("could not generate instructions")?;
 
-    // Part 1
-    let mut stacks = Stacks::new(&initial_stacks).context("could not generate stacks")?;
-    for instruction in &instructions {
-        stacks
-            .perform(instruction)
-            .with_context(|| format!("could not perform instruction {:?}", instruction))?;
-    }
-    let ans1 = stacks.top_of_each();
-
-    // Part 2
-    let mut stacks = Stacks::new(&initial_stacks).context("could not generate stacks")?;
-    for instruction in &instructions {
-        stacks
-            .perform_quickly(instruction)
-            .with_context(|| format!("could not perform instruction {:?}", instruction))?;
-    }
-    let ans2 = stacks.top_of_each();
+    let ans1 = solve_part_1(&initial_stacks, &instructions);
+    let ans2 = solve_part_2(&initial_stacks, &instructions);
 
     Ok((ans1, ans2))
 }

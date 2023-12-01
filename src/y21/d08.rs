@@ -298,8 +298,9 @@ impl Entry {
             ))?;
             unique_patterns.push(signals);
         }
-        unique_patterns
-            .sort_unstable_by(|a, b| a.count_active().partial_cmp(&b.count_active()).unwrap());
+        unique_patterns.sort_unstable_by(|a, b| {
+            a.count_active().partial_cmp(&b.count_active()).unwrap()
+        });
 
         let rhs = vectors::split_and_trim(&rhs, ' ');
         if rhs.len() != 4 {
@@ -314,7 +315,8 @@ impl Entry {
             output_signals.push(signals);
         }
 
-        let mapping = Mapping::new(&unique_patterns).context("could not create mapping")?;
+        let mapping = Mapping::new(&unique_patterns)
+            .context("could not create mapping")?;
         for ii in 0..4 {
             output_signals[ii] = output_signals[ii].map(&mapping);
             if output_signals[ii].digit() == None {
@@ -355,10 +357,23 @@ impl Entry {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+fn solve_part_2(entries: &Vec<Entry>) -> Result<String> {
+    // Part 2: "Reading" the output values... this will be a bit more complex
+    let mut ans2 = 0;
+    for entry in entries {
+        ans2 += entry
+            .get_output()
+            .context(format!("could not process entry {:?}", entry))?;
+    }
+
+    Ok(ans2.to_string())
+}
+
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let mut entries = Vec::new();
     for line in lines {
-        let entry = Entry::new(&line).context(format!("could not process line `{}`", line))?;
+        let entry = Entry::new(&line)
+            .context(format!("could not process line `{}`", line))?;
         entries.push(entry);
     }
 
@@ -367,14 +382,9 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     for entry in &entries {
         ans1 += entry.count_1478();
     }
+    let ans1 = Ok(ans1.to_string());
 
-    // Part 2: "Reading" the output values... this will be a bit more complex
-    let mut ans2 = 0;
-    for entry in &entries {
-        ans2 += entry
-            .get_output()
-            .context(format!("could not process entry {:?}", entry))?;
-    }
+    let ans2 = solve_part_2(&entries);
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

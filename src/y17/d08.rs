@@ -9,9 +9,7 @@ struct CPU {
 
 impl CPU {
     fn new() -> CPU {
-        CPU {
-            registers: HashMap::new(),
-        }
+        CPU { registers: HashMap::new() }
     }
 
     fn run_instruction(&mut self, instruction: Instruction) {
@@ -60,13 +58,10 @@ impl Instruction {
             "dec" => -addend,
             _ => bail!("invalid operation {}", operation),
         };
-        let condition = Condition::new(&condition)
-            .with_context(|| format!("could not format string '{}' as condition", condition))?;
-        Ok(Instruction {
-            operand,
-            increase_by,
-            condition,
-        })
+        let condition = Condition::new(&condition).with_context(|| {
+            format!("could not format string '{}' as condition", condition)
+        })?;
+        Ok(Instruction { operand, increase_by, condition })
     }
 }
 
@@ -78,8 +73,8 @@ struct Condition {
 
 impl Condition {
     fn new(input: &str) -> Result<Condition> {
-        let (lhs, sign, rhs) =
-            scanf!(input, "{} {} {}", String, String, i32).context("could not parse condition")?;
+        let (lhs, sign, rhs) = scanf!(input, "{} {} {}", String, String, i32)
+            .context("could not parse condition")?;
         let sign = Relation::new(&sign)
             .with_context(|| format!("invalid sign representation {}", sign))?;
         Ok(Condition { lhs, sign, rhs })
@@ -109,11 +104,12 @@ impl Relation {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let instructions = lines
         .iter()
         .map(|s| {
-            Instruction::new(s).with_context(|| format!("could not parse instruction '{}'", s))
+            Instruction::new(s)
+                .with_context(|| format!("could not parse instruction '{}'", s))
         })
         .collect::<Result<Vec<_>>>()
         .context("could not read input properly")?;
@@ -128,12 +124,14 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
             record_value = record_value.max(max_value);
         }
     }
-    let ans1 = cpu
+    let ans1 = Ok(cpu
         .highest_register()
-        .context("CPU has no registers for some reason")?
+        .context(
+            "CPU has no registers for some reason (this shouldn't happen!)",
+        )?
         .1
-        .to_string();
-    let ans2 = record_value.to_string();
+        .to_string());
+    let ans2 = Ok(record_value.to_string());
 
     Ok((ans1, ans2))
 }

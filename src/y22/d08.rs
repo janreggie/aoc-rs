@@ -44,11 +44,7 @@ impl Trees {
             bail!("empty input")
         }
 
-        Ok(Trees {
-            heights,
-            row_count,
-            col_count,
-        })
+        Ok(Trees { heights, row_count, col_count })
     }
 
     /// Checks visibility using the VISIBLE_FROM_* constants
@@ -115,7 +111,11 @@ impl Trees {
 
     fn scenic_score(&self, row: usize, col: usize) -> usize {
         // Skip computation if we're at the edge
-        if row == 0 || col == 0 || row == self.row_count - 1 || col == self.col_count - 1 {
+        if row == 0
+            || col == 0
+            || row == self.row_count - 1
+            || col == self.col_count - 1
+        {
             return 0;
         }
 
@@ -171,16 +171,16 @@ const VISIBLE_FROM_ABOVE: u8 = 1 << 1;
 const VISIBLE_FROM_RIGHT: u8 = 1 << 2;
 const VISIBLE_FROM_BELOW: u8 = 1 << 3;
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let trees = Trees::parse(lines).context("could not parse input")?;
 
     // Part 1: Check how many trees are visible
-    let ans1 = trees
+    let ans1 = Ok(trees
         .visibilities()
         .iter()
         .map(|row| row.iter().map(|&c| (c > 0) as u32).sum::<u32>())
         .sum::<u32>()
-        .to_string();
+        .to_string());
 
     // Part 2: Check for highest scenic score
     // It's okay to unwrap here since we're guaranteed that trees is non-empty.
@@ -191,13 +191,13 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     //     }
     //     println!()
     // }
-    let ans2 = trees
+    let ans2 = Ok(trees
         .scenic_scores()
         .iter()
         .map(|row| row.iter().max().unwrap())
         .max()
         .unwrap()
-        .to_string();
+        .to_string());
 
     Ok((ans1, ans2))
 }

@@ -51,9 +51,11 @@ impl DiracState {
         for ii in 0..7 {
             result[ii].count *= state_multipliers[ii].1;
             if is_1 {
-                result[ii].p_1 = add_bound_10(self.p_1, state_multipliers[ii].0);
+                result[ii].p_1 =
+                    add_bound_10(self.p_1, state_multipliers[ii].0);
             } else {
-                result[ii].p_2 = add_bound_10(self.p_2, state_multipliers[ii].0);
+                result[ii].p_2 =
+                    add_bound_10(self.p_2, state_multipliers[ii].0);
             }
         }
 
@@ -83,13 +85,7 @@ impl DiracMultiverse {
             multiverse[0][0].push(DiracState { count: 1, p_1, p_2 })
         }
 
-        DiracMultiverse {
-            thres,
-            won_1: 0,
-            won_2: 0,
-            is_1: true,
-            multiverse,
-        }
+        DiracMultiverse { thres, won_1: 0, won_2: 0, is_1: true, multiverse }
     }
 
     /// Solves the problem
@@ -120,14 +116,16 @@ impl DiracMultiverse {
                             if score_1 >= self.thres {
                                 self.won_1 += next_state.count;
                             } else {
-                                next_multiverse[score_2][score_1].push(next_state);
+                                next_multiverse[score_2][score_1]
+                                    .push(next_state);
                             }
                         } else {
                             score_2 += next_state.p_2 as usize;
                             if score_2 >= self.thres {
                                 self.won_2 += next_state.count;
                             } else {
-                                next_multiverse[score_2][score_1].push(next_state);
+                                next_multiverse[score_2][score_1]
+                                    .push(next_state);
                             }
                         }
                     }
@@ -152,7 +150,7 @@ impl DiracMultiverse {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     // Parse input
     if lines.len() != 2 {
         bail!("expected input to be two lines, got {}", lines.len())
@@ -168,7 +166,8 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     let mut loaded_die = Loaded::new();
     let mut is_player_1 = true;
     while score_1 < 1000 && score_2 < 1000 {
-        let die_output = loaded_die.roll() + loaded_die.roll() + loaded_die.roll();
+        let die_output =
+            loaded_die.roll() + loaded_die.roll() + loaded_die.roll();
         if is_player_1 {
             pos_1 = add_bound_10(pos_1, die_output);
             score_1 += pos_1;
@@ -184,11 +183,13 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     } else {
         ans1 = score_1 * loaded_die.count() as u32
     }
+    let ans1 = Ok(ans1.to_string());
 
     // Now for Part 2... bruh
     let mut dirac_multiverse = DiracMultiverse::new(input_1, input_2, 21);
     dirac_multiverse.solve();
     let ans2 = dirac_multiverse.won_1.max(dirac_multiverse.won_2);
+    let ans2 = Ok(ans2.to_string());
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

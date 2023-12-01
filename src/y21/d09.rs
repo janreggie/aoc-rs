@@ -29,18 +29,18 @@ impl Heightmap {
             let mut heightmap_line = Vec::new();
             for ch in line.chars() {
                 match ch.to_digit(10) {
-                    None => bail!("could not parse character `{}` from line `{}`", ch, line),
+                    None => bail!(
+                        "could not parse character `{}` from line `{}`",
+                        ch,
+                        line
+                    ),
                     Some(d) => heightmap_line.push(d),
                 }
             }
             heights.push(heightmap_line);
         }
 
-        Ok(Heightmap {
-            heights,
-            x_len,
-            y_len,
-        })
+        Ok(Heightmap { heights, x_len, y_len })
     }
 
     /// Returns the values surrounding point (x,y) in the order [up,down,left,right].
@@ -115,7 +115,8 @@ impl Heightmap {
                         stack.push((x, y - 1));
                         state[y - 1][x] = State::Visiting;
                     }
-                    if y < self.y_len - 1 && state[y + 1][x] == State::Unvisited {
+                    if y < self.y_len - 1 && state[y + 1][x] == State::Unvisited
+                    {
                         stack.push((x, y + 1));
                         state[y + 1][x] = State::Visiting;
                     }
@@ -123,7 +124,8 @@ impl Heightmap {
                         stack.push((x - 1, y));
                         state[y][x - 1] = State::Visiting;
                     }
-                    if x < self.x_len - 1 && state[y][x + 1] == State::Unvisited {
+                    if x < self.x_len - 1 && state[y][x + 1] == State::Unvisited
+                    {
                         stack.push((x + 1, y));
                         state[y][x + 1] = State::Visiting;
                     }
@@ -136,17 +138,18 @@ impl Heightmap {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
-    let heightmap = Heightmap::new(lines).context("could not generate heightmap")?;
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
+    let heightmap =
+        Heightmap::new(lines).context("could not generate heightmap")?;
 
     // Part 1: Risk of low points
-    let ans1 = heightmap.low_points_risk();
+    let ans1 = Ok(heightmap.low_points_risk().to_string());
 
     // Part 2: Sizes of three largest basins
     let mut basin_sizes = heightmap.basins();
     basin_sizes.sort();
     basin_sizes.reverse();
-    let ans2: usize = basin_sizes.iter().take(3).product();
+    let ans2 = Ok(basin_sizes.iter().take(3).product::<usize>().to_string());
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

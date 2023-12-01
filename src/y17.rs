@@ -18,7 +18,9 @@ mod d15;
 mod d16;
 mod d17;
 
-pub fn solver(day: u8) -> fn(Vec<String>) -> Result<(String, String)> {
+pub fn solver(
+    day: u8,
+) -> fn(Vec<String>) -> Result<(Result<String>, Result<String>)> {
     match day {
         1 => d01::solve,
         2 => d02::solve,

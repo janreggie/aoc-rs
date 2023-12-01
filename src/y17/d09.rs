@@ -15,7 +15,9 @@ impl Garbage {
                         return Ok((Garbage(garbage), rest));
                     }
                     if *first == b'!' {
-                        (_, feed) = rest.split_first().context("invalid exclamation point")?;
+                        (_, feed) = rest
+                            .split_first()
+                            .context("invalid exclamation point")?;
                         continue;
                     }
                     garbage.push(*first as char);
@@ -48,14 +50,14 @@ impl Group {
                             break;
                         }
                         b'<' => {
-                            let (garbage, next_feed) =
-                                Garbage::parse(feed).context("could not parse feed")?;
+                            let (garbage, next_feed) = Garbage::parse(feed)
+                                .context("could not parse feed")?;
                             feed = next_feed;
                             contents.push(Content::Garbage(garbage))
                         }
                         b'{' => {
-                            let (group, next_feed) =
-                                Group::parse(feed).context("could not parse feed")?;
+                            let (group, next_feed) = Group::parse(feed)
+                                .context("could not parse feed")?;
                             feed = next_feed;
                             contents.push(Content::Group(group))
                         }
@@ -67,7 +69,10 @@ impl Group {
                 }
                 Ok((Group { contents }, feed))
             }
-            Some(ch) => bail!("expects '{{' to start group, got '{}' instead", *ch as char),
+            Some(ch) => bail!(
+                "expects '{{' to start group, got '{}' instead",
+                *ch as char
+            ),
             None => bail!("cannot parse empty Group"),
         }
     }
@@ -104,19 +109,22 @@ enum Content {
     Group(Group),
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     if lines.len() != 1 {
         bail!("expected only 1 line, got {}", lines.len())
     }
     let input = lines.iter().next().unwrap().as_bytes();
-    let (group, bytes) = Group::parse(input).context("could not parse input properly")?;
+    let (group, bytes) =
+        Group::parse(input).context("could not parse input properly")?;
     if !bytes.is_empty() {
         bail!("stray bytes {:?}", bytes);
     }
 
     // Part 1: Score in terms of groups
-    let ans1 = group.score().to_string();
+    let ans1 = Ok(group.score().to_string());
+
     // Part 2: Amount of garbage
-    let ans2 = group.garbage_count().to_string();
+    let ans2 = Ok(group.garbage_count().to_string());
+
     Ok((ans1, ans2))
 }

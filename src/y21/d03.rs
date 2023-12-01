@@ -32,10 +32,7 @@ impl Report {
         if lines.len() == 0 {
             bail!("empty lines");
         }
-        let mut result = Report {
-            nums: Vec::new(),
-            bitsize: lines[0].len(),
-        };
+        let mut result = Report { nums: Vec::new(), bitsize: lines[0].len() };
         for line in lines {
             if line.len() != result.bitsize {
                 bail!(
@@ -89,7 +86,8 @@ impl Report {
             return old.nums[0].0;
         }
 
-        let bit_set_as_one_count = old.nums.iter().filter(|num| num.is_set(ind)).count();
+        let bit_set_as_one_count =
+            old.nums.iter().filter(|num| num.is_set(ind)).count();
         let choose_one = bit_set_as_one_count > ((old.nums.len() - 1) / 2);
 
         let new_nums: Vec<Number> = old
@@ -103,10 +101,7 @@ impl Report {
             new_nums[0].0
         } else {
             Report::oxygen_generator_rating_iter(
-                &Report {
-                    nums: new_nums,
-                    bitsize: old.bitsize,
-                },
+                &Report { nums: new_nums, bitsize: old.bitsize },
                 ind - 1,
             )
         }
@@ -118,7 +113,8 @@ impl Report {
             return old.nums[0].0;
         }
 
-        let bit_set_as_zero_count = old.nums.iter().filter(|num| !num.is_set(ind)).count();
+        let bit_set_as_zero_count =
+            old.nums.iter().filter(|num| !num.is_set(ind)).count();
         let choose_zero = bit_set_as_zero_count <= (old.nums.len() / 2);
 
         let new_nums: Vec<Number> = old
@@ -132,21 +128,18 @@ impl Report {
             new_nums[0].0
         } else {
             Report::co2_scrubber_rating_iter(
-                &Report {
-                    nums: new_nums,
-                    bitsize: old.bitsize,
-                },
+                &Report { nums: new_nums, bitsize: old.bitsize },
                 ind - 1,
             )
         }
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let report = Report::new(&lines).context("could not read input data")?;
 
-    let ans1 = report.power_consumption();
-    let ans2 = report.life_support_rating();
+    let ans1 = Ok(report.power_consumption().to_string());
+    let ans2 = Ok(report.life_support_rating().to_string());
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

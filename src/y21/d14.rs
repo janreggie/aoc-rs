@@ -43,7 +43,8 @@ impl Polymers {
         if template.len() < 1 {
             bail!("template somehow empty");
         }
-        let template: Option<Vec<usize>> = template.chars().map(Polymers::parse_char).collect();
+        let template: Option<Vec<usize>> =
+            template.chars().map(Polymers::parse_char).collect();
         let template = template.context("could not parse template")?;
 
         // Interpret template
@@ -58,20 +59,16 @@ impl Polymers {
         // Extract insertion rules
         let mut rules = [[None; 26]; 26];
         for rule in insertion_rules {
-            let ((a, b), r) = Polymers::parse_insertion_rule(&rule)
-                .context(format!("could not interpret insertion rule `{}`", rule))?;
+            let ((a, b), r) = Polymers::parse_insertion_rule(&rule).context(
+                format!("could not interpret insertion rule `{}`", rule),
+            )?;
             if let Some(_) = rules[a][b] {
                 bail!("rule `{}` conflicts with an earlier rule", rule);
             }
             rules[a][b] = Some(r);
         }
 
-        Ok(Polymers {
-            pairs,
-            first,
-            last,
-            rules,
-        })
+        Ok(Polymers { pairs, first, last, rules })
     }
 
     /// 'A' -> 0, 'B' -> 1, ...
@@ -152,20 +149,21 @@ impl Polymers {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
-    let mut polymers = Polymers::new(lines).context("could not create polymers struct")?;
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
+    let mut polymers =
+        Polymers::new(lines).context("could not create polymers struct")?;
 
     // Part 1: Count between the lowest and highest
     for _ in 0..10 {
         polymers.iter();
     }
-    let ans1 = polymers.highest_minus_lowest();
+    let ans1 = Ok(polymers.highest_minus_lowest().to_string());
 
     // Part 2: Let's run it 30 more times
     for _ in 0..30 {
         polymers.iter();
     }
-    let ans2 = polymers.highest_minus_lowest();
+    let ans2 = Ok(polymers.highest_minus_lowest().to_string());
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

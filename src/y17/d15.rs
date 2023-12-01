@@ -24,15 +24,17 @@ fn next2(n: u64, f: u64, mask: u64) -> u64 {
     n
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     if lines.len() != 2 {
         bail!("expects 2 lines, got {}", lines.len())
     }
     let mut input = lines.into_iter();
-    let start_a = scanf!(input.next().unwrap(), "Generator A starts with {}", u64)
-        .context("could not parse starting value for Generator A")?;
-    let start_b = scanf!(input.next().unwrap(), "Generator B starts with {}", u64)
-        .context("could not parse starting value for Generator B")?;
+    let start_a =
+        scanf!(input.next().unwrap(), "Generator A starts with {}", u64)
+            .context("could not parse starting value for Generator A")?;
+    let start_b =
+        scanf!(input.next().unwrap(), "Generator B starts with {}", u64)
+            .context("could not parse starting value for Generator B")?;
 
     // Part 1: Number of times last 16 bits equal when multiplying
     let mut count = 0;
@@ -44,7 +46,7 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
             count += 1;
         }
     }
-    let ans1 = count.to_string();
+    let ans1 = Ok(count.to_string());
 
     // Part 2: Number of times last 16 bits will equal, while it ends in 0b11 or 0b111
     let mut count = 0;
@@ -56,7 +58,7 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
             count += 1;
         }
     }
-    let ans2 = count.to_string();
+    let ans2 = Ok(count.to_string());
 
     Ok((ans1, ans2))
 }

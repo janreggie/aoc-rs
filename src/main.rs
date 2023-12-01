@@ -53,12 +53,9 @@ fn main() {
     let after = Instant::now();
 
     // Print out the results
-    println!("Answer for Part 1 is {}", result.0);
-    println!("Answer for Part 2 is {}", result.1);
-    println!(
-        "It took {:?} to solve the current problem",
-        after.sub(before)
-    );
+    println!("Answer for Part 1 is {:?}", result.0);
+    println!("Answer for Part 2 is {:?}", result.1);
+    println!("It took {:?} to solve the current problem", after.sub(before));
 }
 
 fn read_lines() -> io::Result<Vec<String>> {

@@ -51,10 +51,7 @@ struct SpiralMemory {
 
 impl SpiralMemory {
     pub fn new() -> SpiralMemory {
-        SpiralMemory {
-            grid: HashMap::new(),
-            pos: (0, 0),
-        }
+        SpiralMemory { grid: HashMap::new(), pos: (0, 0) }
     }
 
     fn next_pos((x, y): (i32, i32)) -> (i32, i32) {
@@ -114,7 +111,7 @@ impl Iterator for SpiralMemory {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     if lines.len() != 1 {
         bail!("input should be only one line")
     }
@@ -122,7 +119,7 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
 
     // Part 1: Get the Manhattan distance
     let (x, y) = number_to_location(input);
-    let ans1 = (x.abs() + y.abs()).to_string();
+    let ans1 = Ok((x.abs() + y.abs()).to_string());
 
     // Part 2: Iterate throughout the spiral memory
     let ans2;
@@ -130,9 +127,10 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     loop {
         let (_pos, value) = spiral_memory.next().unwrap();
         if value > input {
-            ans2 = value.to_string();
+            ans2 = Ok(value.to_string());
             break;
         }
     }
+
     Ok((ans1, ans2))
 }

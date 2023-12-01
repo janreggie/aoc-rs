@@ -18,8 +18,12 @@ impl Cavern {
 
         let mut risks = Vec::new();
         for line in lines {
-            let row: Option<Vec<u32>> = line.chars().map(|x| x.to_digit(10)).collect();
-            let row = row.context(format!("could not format `{}` as a row of numbers", line))?;
+            let row: Option<Vec<u32>> =
+                line.chars().map(|x| x.to_digit(10)).collect();
+            let row = row.context(format!(
+                "could not format `{}` as a row of numbers",
+                line
+            ))?;
             if row.len() != width {
                 bail!(
                     "expected row `{}` to be of length {}, got {} instead",
@@ -31,11 +35,7 @@ impl Cavern {
             risks.push(row);
         }
 
-        Ok(Cavern {
-            risks,
-            width,
-            height,
-        })
+        Ok(Cavern { risks, width, height })
     }
 
     fn least_risk(&self) -> u32 {
@@ -93,20 +93,16 @@ impl Cavern {
             }
         }
 
-        Cavern {
-            risks,
-            width,
-            height,
-        }
+        Cavern { risks, width, height }
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let cavern = Cavern::new(lines).context("could not parse input")?;
 
-    let ans1 = cavern.least_risk();
+    let ans1 = Ok(cavern.least_risk().to_string());
     let cavern = cavern.expand();
-    let ans2 = cavern.least_risk();
+    let ans2 = Ok(cavern.least_risk().to_string());
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

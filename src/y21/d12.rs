@@ -14,7 +14,11 @@ impl Caves {
         for line in lines {
             let mut nodes = vectors::split_and_trim(&line, '-');
             if nodes.len() != 2 {
-                bail!("expected {} to be split into 2, got {}", line, nodes.len());
+                bail!(
+                    "expected {} to be split into 2, got {}",
+                    line,
+                    nodes.len()
+                );
             }
 
             let n1 = nodes.pop().unwrap();
@@ -32,7 +36,11 @@ impl Caves {
         self.part_1_iter(Vec::new(), "start").0
     }
 
-    fn part_1_iter(&self, mut stack: Vec<String>, current: &str) -> (usize, Vec<String>) {
+    fn part_1_iter(
+        &self,
+        mut stack: Vec<String>,
+        current: &str,
+    ) -> (usize, Vec<String>) {
         let mut result = 0;
 
         for next in self.paths.get(current).unwrap() {
@@ -98,11 +106,11 @@ impl Caves {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let graph = Caves::new(lines).context("could not create graph")?;
 
-    let ans1 = graph.part_1();
-    let ans2 = graph.part_2();
+    let ans1 = Ok(graph.part_1().to_string());
+    let ans2 = Ok(graph.part_2().to_string());
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

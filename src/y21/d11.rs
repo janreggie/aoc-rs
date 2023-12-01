@@ -28,7 +28,11 @@ impl Octopuses {
             for jj in 0..10 {
                 let ch = line[jj];
                 match ch.to_digit(10) {
-                    None => bail!("could not parse character `{}` from line `{:?}`", ch, line),
+                    None => bail!(
+                        "could not parse character `{}` from line `{:?}`",
+                        ch,
+                        line
+                    ),
                     Some(d) => energy_levels[ii][jj] = d as u8,
                 }
             }
@@ -140,8 +144,9 @@ impl fmt::Display for Octopuses {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
-    let mut octopuses = Octopuses::new(lines).context("could not create octopuses")?;
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
+    let mut octopuses =
+        Octopuses::new(lines).context("could not create octopuses")?;
 
     // Part 1: How many total flashes after 100 steps.
     // Part 2: When the result becomes 100, since that's when *all* flash.
@@ -154,6 +159,7 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
             ans2 = ii + 1;
         }
     }
+    let ans1 = Ok(ans1.to_string());
 
     if ans2 == 0 {
         for ii in 100.. {
@@ -164,6 +170,7 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
             }
         }
     }
+    let ans2 = Ok(ans2.to_string());
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

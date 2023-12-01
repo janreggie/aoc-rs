@@ -3,11 +3,8 @@ use anyhow::{bail, Ok, Result};
 use super::d10::Knot;
 
 fn knot_hash(input: &str) -> [u8; 16] {
-    let mut lengths = input
-        .as_bytes()
-        .iter()
-        .map(|x| *x as usize)
-        .collect::<Vec<_>>();
+    let mut lengths =
+        input.as_bytes().iter().map(|x| *x as usize).collect::<Vec<_>>();
     lengths.extend_from_slice(&[17, 31, 73, 47, 23]);
     let mut knot = Knot::new();
     for _ in 0..64 {
@@ -42,10 +39,7 @@ impl Disk {
     }
 
     fn count_used(&self) -> usize {
-        self.grid
-            .map(|row| row.iter().filter(|b| **b).count())
-            .iter()
-            .sum()
+        self.grid.map(|row| row.iter().filter(|b| **b).count()).iter().sum()
     }
 
     fn count_regions(&self) -> usize {
@@ -56,11 +50,15 @@ impl Disk {
             Consideration,
             Visited,
         }
-        let mut grid = self
-            .grid
-            .map(|row| row.map(|b| if b { State::Unvisited } else { State::Empty }));
+        let mut grid = self.grid.map(|row| {
+            row.map(|b| if b { State::Unvisited } else { State::Empty })
+        });
 
-        fn visit(grid: &mut [[State; 128]; 128], row: usize, col: usize) -> bool {
+        fn visit(
+            grid: &mut [[State; 128]; 128],
+            row: usize,
+            col: usize,
+        ) -> bool {
             if grid[row][col] != State::Unvisited {
                 return false;
             }
@@ -102,7 +100,7 @@ impl Disk {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     if lines.len() != 1 {
         bail!("expected only 1 line as input, got {}", lines.len())
     }
@@ -110,10 +108,10 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     let disk = Disk::new(&input);
 
     // Part 1: Number of squares (ones) in the grid
-    let ans1 = disk.count_used().to_string();
+    let ans1 = Ok(disk.count_used().to_string());
 
     // Part 2: Island counting
-    let ans2 = disk.count_regions().to_string();
+    let ans2 = Ok(disk.count_regions().to_string());
 
     Ok((ans1, ans2))
 }

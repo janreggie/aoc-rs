@@ -25,10 +25,7 @@ impl Promenade {
             .programs
             .iter()
             .map(|(&prog, &pos)| {
-                (
-                    mapping.program(prog).unwrap(),
-                    mapping.position(pos).unwrap(),
-                )
+                (mapping.program(prog).unwrap(), mapping.position(pos).unwrap())
             })
             .collect::<Vec<_>>();
         for (prog, pos) in pairs {
@@ -56,17 +53,18 @@ impl DanceMove {
     fn new(s: &str) -> Result<DanceMove> {
         match s.chars().next() {
             Some('s') => {
-                let size = scanf!(s, "s{}", u8).context("could not get size of spin")?;
+                let size = scanf!(s, "s{}", u8)
+                    .context("could not get size of spin")?;
                 Ok(DanceMove::Spin(size))
             }
             Some('x') => {
-                let (a, b) =
-                    scanf!(s, "x{}/{}", u8, u8).context("could not get positions for exchange")?;
+                let (a, b) = scanf!(s, "x{}/{}", u8, u8)
+                    .context("could not get positions for exchange")?;
                 Ok(DanceMove::Exchange(a, b))
             }
             Some('p') => {
-                let (a, b) =
-                    scanf!(s, "p{}/{}", char, char).context("could not get programs for swap")?;
+                let (a, b) = scanf!(s, "p{}/{}", char, char)
+                    .context("could not get programs for swap")?;
                 Ok(DanceMove::Partner(a, b))
             }
             Some(_) => bail!("could not interpret dance {}", s),
@@ -92,11 +90,7 @@ impl Mapping {
             program_map.insert((0x61 + ii) as char, (0x61 + ii) as char);
         }
 
-        Mapping {
-            position_map,
-            program_map,
-            size: n,
-        }
+        Mapping { position_map, program_map, size: n }
     }
 
     fn position(&self, old_pos: u8) -> Option<u8> {
@@ -178,21 +172,19 @@ impl Mapping {
 
         let mut position_map = BiHashMap::new();
         for left_pos in 0..self.size {
-            let right_pos = m2.position(self.position(left_pos).unwrap()).unwrap();
+            let right_pos =
+                m2.position(self.position(left_pos).unwrap()).unwrap();
             position_map.insert(left_pos, right_pos);
         }
         let mut program_map = BiHashMap::new();
         for left_prog in 0..self.size {
             let left_prog = (left_prog + 0x61) as char;
-            let right_prog = m2.program(self.program(left_prog).unwrap()).unwrap();
+            let right_prog =
+                m2.program(self.program(left_prog).unwrap()).unwrap();
             program_map.insert(left_prog, right_prog);
         }
 
-        Mapping {
-            position_map,
-            program_map,
-            size: self.size,
-        }
+        Mapping { position_map, program_map, size: self.size }
     }
 
     fn pow(&self, n: usize) -> Mapping {
@@ -208,7 +200,7 @@ impl Mapping {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     if lines.len() != 1 {
         bail!("expected 1 line as input, got {} instead", lines.len())
     }
@@ -216,7 +208,9 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
     let dance_moves = input
         .split(',')
         .map(|s| {
-            DanceMove::new(s).with_context(|| format!("could not interpret '{}' as DanceMove", s))
+            DanceMove::new(s).with_context(|| {
+                format!("could not interpret '{}' as DanceMove", s)
+            })
         })
         .collect::<Result<Vec<_>>>()
         .context("could not parse input")?;
@@ -230,13 +224,13 @@ pub fn solve(lines: Vec<String>) -> Result<(String, String)> {
         };
     }
     promenade.apply(&mapping);
-    let ans1 = promenade.program_order();
+    let ans1 = Ok(promenade.program_order());
 
     // Part 2: Perform a billion times
     let mapping = mapping.pow(1_000_000_000);
     let mut promenade = Promenade::new(16);
     promenade.apply(&mapping);
-    let ans2 = promenade.program_order();
+    let ans2 = Ok(promenade.program_order());
 
     Ok((ans1, ans2))
 }
