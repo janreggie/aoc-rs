@@ -30,13 +30,7 @@ fn read_puzzle_from_files(
     let answer_b =
         if answer_b.is_empty() { None } else { Some(answer_b.to_string()) };
 
-    Ok(Puzzle {
-        year,
-        day,
-        input_data,
-        answer_a: Some(answers[0].to_string()),
-        answer_b: Some(answers[1].to_string()),
-    })
+    Ok(Puzzle { year, day, input_data, answer_a, answer_b })
 }
 
 #[test]

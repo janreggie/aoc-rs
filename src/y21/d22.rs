@@ -113,6 +113,10 @@ impl NaiveCube {
     }
 }
 
+fn solve_part_2() -> Result<String> {
+    bail!("unimplemented")
+}
+
 pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let steps: Result<Vec<Step>> = lines
         .iter()
@@ -132,12 +136,7 @@ pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
 
     // Part 2. In my 16GB RAM environment this crashes.
     // TODO: Implement using intervals and whatever
-    let mut cube = NaiveCube::new(10000);
-    for step in &steps {
-        eprintln!("Running step {:?}", &step);
-        cube.run(step);
-    }
-    let ans2 = Ok(cube.count_on().to_string());
+    let ans2 = solve_part_2();
 
     Ok((ans1, ans2))
 }
