@@ -1,5 +1,4 @@
 use anyhow::{bail, Context, Result};
-use sscanf::scanf;
 
 fn add_bound_10(a: u32, b: u32) -> u32 {
     (a + b - 1) % 10 + 1
@@ -155,10 +154,14 @@ pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     if lines.len() != 2 {
         bail!("expected input to be two lines, got {}", lines.len())
     }
-    let input_1 = scanf!(&lines[0], "Player 1 starting position: {}", u32)
-        .context("could not parse player 1 starting pos")?;
-    let input_2 = scanf!(&lines[1], "Player 2 starting position: {}", u32)
-        .context("could not parse player 2 starting pos")?;
+    let input_1 = lines[0]
+        .strip_prefix("Player 1 starting position: ")
+        .and_then(|p| p.parse::<u32>().ok())
+        .context("could not parse player 1 starting position")?;
+    let input_2 = lines[1]
+        .strip_prefix("Player 1 starting position: ")
+        .and_then(|p| p.parse::<u32>().ok())
+        .context("could not parse player 1 starting position")?;
 
     // Part 1 is relatively straightforward
     let (mut score_1, mut score_2) = (0, 0);

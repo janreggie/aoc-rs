@@ -1,11 +1,12 @@
 use anyhow::{Context, Result};
-use sscanf::scanf;
+use sscanf::sscanf;
 
 pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let input: Vec<((u32, u32), (u32, u32))> = lines
         .iter()
         .map(|line| {
-            scanf!(line, "{}-{},{}-{}", u32, u32, u32, u32)
+            sscanf!(line, "{}-{},{}-{}", u32, u32, u32, u32)
+                .ok()
                 .with_context(|| format!("invalid line {}", line))
                 .map(|(a1, a2, b1, b2)| ((a1, a2), (b1, b2)))
         })

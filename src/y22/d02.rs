@@ -1,5 +1,5 @@
 use anyhow::{bail, Context, Result};
-use sscanf::scanf;
+use sscanf::sscanf;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Token {
@@ -63,7 +63,8 @@ pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let tokens = lines
         .iter()
         .map(|line| {
-            scanf!(line, "{} {}", char, char)
+            sscanf!(line, "{} {}", char, char)
+                .ok()
                 .with_context(|| format!("could not parse line {}", line))
         })
         .collect::<Result<Vec<(char, char)>>>()?

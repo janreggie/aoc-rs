@@ -1,5 +1,4 @@
 use anyhow::{bail, Context, Ok, Result};
-use sscanf::scanf;
 
 const GEN_A_FACTOR: u64 = 16807;
 const GEN_B_FACTOR: u64 = 48271;
@@ -29,12 +28,18 @@ pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
         bail!("expects 2 lines, got {}", lines.len())
     }
     let mut input = lines.into_iter();
-    let start_a =
-        scanf!(input.next().unwrap(), "Generator A starts with {}", u64)
-            .context("could not parse starting value for Generator A")?;
-    let start_b =
-        scanf!(input.next().unwrap(), "Generator B starts with {}", u64)
-            .context("could not parse starting value for Generator B")?;
+    let start_a = input
+        .next()
+        .unwrap()
+        .strip_prefix("Generator A starts with ")
+        .and_then(|v| v.parse::<u64>().ok())
+        .context("could not parse starting value for Generator A")?;
+    let start_b = input
+        .next()
+        .unwrap()
+        .strip_prefix("Generator A starts with ")
+        .and_then(|v| v.parse::<u64>().ok())
+        .context("could not parse starting value for Generator B")?;
 
     // Part 1: Number of times last 16 bits equal when multiplying
     let mut count = 0;

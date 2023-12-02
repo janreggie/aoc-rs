@@ -1,5 +1,5 @@
 use anyhow::{bail, Context, Result};
-use sscanf::scanf;
+use sscanf::sscanf;
 
 #[derive(Debug)]
 struct TargetArea {
@@ -79,9 +79,12 @@ pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     }
     let mut lines = lines;
     let input = lines.pop().unwrap();
-    let (x1, x2, y1, y2) =
-        scanf!(&input, "target area: x={}..{}, y={}..{}", i32, i32, i32, i32)
-            .context("unable to parse input")?;
+    let parsed_input =
+        sscanf!(&input, "target area: x={}..{}, y={}..{}", i32, i32, i32, i32);
+    if let Err(_) = parsed_input {
+        bail!("unable to parse input {}", input);
+    }
+    let (x1, x2, y1, y2) = parsed_input.unwrap();
     let target_area = TargetArea::new(x1, x2, y1, y2)
         .context("could not create target area")?;
 

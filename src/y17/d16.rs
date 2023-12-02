@@ -1,6 +1,6 @@
 use anyhow::{bail, Context, Result};
 use bimap::BiHashMap;
-use sscanf::scanf;
+use sscanf::{sscanf, Error::MatchFailed};
 
 #[derive(Debug)]
 struct Promenade {
@@ -50,26 +50,18 @@ enum DanceMove {
 }
 
 impl DanceMove {
-    fn new(s: &str) -> Result<DanceMove> {
+    fn new(s: &str) -> Option<DanceMove> {
         match s.chars().next() {
             Some('s') => {
-                let size = scanf!(s, "s{}", u8)
-                    .context("could not get size of spin")?;
-                Ok(DanceMove::Spin(size))
+                sscanf!(s, "s{}", u8).and_then(|v| Ok(DanceMove::Spin(v)))
             }
-            Some('x') => {
-                let (a, b) = scanf!(s, "x{}/{}", u8, u8)
-                    .context("could not get positions for exchange")?;
-                Ok(DanceMove::Exchange(a, b))
-            }
-            Some('p') => {
-                let (a, b) = scanf!(s, "p{}/{}", char, char)
-                    .context("could not get programs for swap")?;
-                Ok(DanceMove::Partner(a, b))
-            }
-            Some(_) => bail!("could not interpret dance {}", s),
-            None => bail!("input is empty"),
+            Some('x') => sscanf!(s, "x{}/{}", u8, u8)
+                .and_then(|(a, b)| Ok(DanceMove::Exchange(a, b))),
+            Some('p') => sscanf!(s, "p{}/{}", char, char)
+                .and_then(|(a, b)| Ok(DanceMove::Partner(a, b))),
+            _ => Err(MatchFailed),
         }
+        .ok()
     }
 }
 

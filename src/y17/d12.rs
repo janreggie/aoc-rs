@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use anyhow::{bail, Context, Ok, Result};
-use sscanf::scanf;
+use sscanf::sscanf;
 
 struct Village {
     connections: Vec<HashSet<usize>>,
@@ -10,8 +10,10 @@ struct Village {
 impl Village {
     fn new(lines: Vec<String>) -> Result<Village> {
         fn line_to_pair(line: &str) -> Result<(usize, HashSet<usize>)> {
-            let (sender, recipients) = scanf!(line, "{} <-> {}", usize, String)
-                .context("could not parse line")?;
+            let (sender, recipients) =
+                sscanf!(line, "{} <-> {}", usize, String)
+                    .ok()
+                    .context("could not parse line")?;
             let recipients = recipients
                 .split(", ")
                 .map(|rr| {

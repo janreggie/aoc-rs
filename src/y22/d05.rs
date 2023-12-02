@@ -1,5 +1,5 @@
 use anyhow::{bail, Context, Result};
-use sscanf::scanf;
+use sscanf::sscanf;
 
 use crate::util::vectors::group;
 
@@ -14,8 +14,9 @@ struct Instruction {
 
 impl Instruction {
     fn new(input: &str) -> Result<Instruction> {
-        scanf!(input, "move {} from {} to {}", usize, usize, usize)
+        sscanf!(input, "move {} from {} to {}", usize, usize, usize)
             .map(|(count, from, to)| Instruction { count, from, to })
+            .ok()
             .context("could not parse input")
     }
 }
@@ -51,7 +52,8 @@ impl Stacks {
                 if current == "   " {
                     continue;
                 }
-                let crate_val = scanf!(current, "[{}]", Crate)
+                let crate_val = sscanf!(current, "[{}]", Crate)
+                    .ok()
                     .with_context(|| format!("unable to parse {}", current))?;
                 crates[col].push(crate_val);
             }

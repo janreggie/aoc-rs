@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::{bail, Context, Ok, Result};
-use sscanf::scanf;
+use sscanf::sscanf;
 
 struct CPU {
     registers: HashMap<String, i32>,
@@ -50,9 +50,12 @@ struct Instruction {
 
 impl Instruction {
     fn new(input: &str) -> Result<Instruction> {
-        let (operand, operation, addend, condition) =
-            scanf!(input, "{} {} {} if {}", String, String, i32, String)
-                .context("could not parse instruction")?;
+        let instruction =
+            sscanf!(input, "{} {} {} if {}", String, String, i32, String);
+        if let Err(_) = instruction {
+            bail!("could not parse instruction");
+        }
+        let (operand, operation, addend, condition) = instruction.unwrap();
         let increase_by = match operation.as_str() {
             "inc" => addend,
             "dec" => -addend,
@@ -73,8 +76,11 @@ struct Condition {
 
 impl Condition {
     fn new(input: &str) -> Result<Condition> {
-        let (lhs, sign, rhs) = scanf!(input, "{} {} {}", String, String, i32)
-            .context("could not parse condition")?;
+        let condition = sscanf!(input, "{} {} {}", String, String, i32);
+        if let Err(_) = condition {
+            bail!("could not parse condition");
+        }
+        let (lhs, sign, rhs) = condition.unwrap();
         let sign = Relation::new(&sign)
             .with_context(|| format!("invalid sign representation {}", sign))?;
         Ok(Condition { lhs, sign, rhs })

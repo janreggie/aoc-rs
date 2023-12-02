@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::util::vectors::odd_one_out_index;
 use anyhow::{Context, Result};
-use sscanf::scanf;
+use sscanf::sscanf;
 
 #[derive(Debug, Clone)]
 struct ProgramGraph {
@@ -22,13 +22,17 @@ impl ProgramGraph {
         let mut children_map = HashMap::new();
         for line in lines {
             let mut split_line = line.split(" -> ");
-            let (name, weight) = scanf!(
-                split_line.nth(0).context("could not get name and weight")?,
-                "{} ({})",
-                String,
-                u32
-            )
-            .context("could not parse name and weight")?;
+            let name_and_weight =
+                split_line.nth(0).context("could not get name and weight")?;
+            let (name, weight) =
+                sscanf!(name_and_weight, "{} ({})", String, u32)
+                    .ok()
+                    .with_context(|| {
+                        format!(
+                            "cannot derive name and weight from {}",
+                            name_and_weight
+                        )
+                    })?;
             let children = {
                 if let Some(subprogs) = split_line.nth(0) {
                     subprogs.split(", ").map(|s| s.to_string()).collect()

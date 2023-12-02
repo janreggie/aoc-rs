@@ -1,5 +1,5 @@
 use anyhow::{bail, Context, Result};
-use sscanf::scanf;
+use sscanf::sscanf;
 
 #[derive(Debug)]
 struct Step {
@@ -11,7 +11,7 @@ struct Step {
 
 impl Step {
     fn new(input: &str) -> Result<Step> {
-        let (instr, x1, x2, y1, y2, z1, z2) = scanf!(
+        let parsed_input = sscanf!(
             input,
             "{} x={}..{},y={}..{},z={}..{}",
             String,
@@ -21,8 +21,12 @@ impl Step {
             i32,
             i32,
             i32
-        )
-        .context("input is of invalid format")?;
+        );
+        if let Err(_) = parsed_input {
+            bail!("cannot parse input");
+        }
+        let (instr, x1, x2, y1, y2, z1, z2) = parsed_input.unwrap();
+
         if x1 > x2 || y1 > y2 || z1 > z2 {
             bail!("ranges must be valid");
         }

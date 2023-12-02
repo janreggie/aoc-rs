@@ -1,6 +1,6 @@
-use anyhow::{Context, Ok, Result};
+use anyhow::{bail, Context, Ok, Result};
 use num::Integer;
-use sscanf::scanf;
+use sscanf::sscanf;
 
 struct Firewall {
     /// Vec<(depth, range)>
@@ -69,8 +69,11 @@ pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let layers = lines
         .iter()
         .map(|line| {
-            scanf!(line, "{}: {}", u32, u32)
-                .with_context(|| format!("could not parse line '{}'", line))
+            let parsed_line = sscanf!(line, "{}: {}", u32, u32);
+            if let Err(_) = parsed_line {
+                bail!("could not parse line '{}'", line);
+            }
+            Ok(parsed_line.unwrap())
         })
         .collect::<Result<Vec<_>>>()
         .context("could not parse input")?;
