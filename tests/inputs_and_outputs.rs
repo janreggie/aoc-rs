@@ -24,6 +24,11 @@ fn read_puzzle_from_files(
     if answers.len() < 2 {
         bail!("output file {} too short", output_file.to_str().unwrap());
     }
+    let (answer_a, answer_b) = (answers[0], answers[1]);
+    let answer_a =
+        if answer_a.is_empty() { None } else { Some(answer_a.to_string()) };
+    let answer_b =
+        if answer_b.is_empty() { None } else { Some(answer_b.to_string()) };
 
     Ok(Puzzle {
         year,
