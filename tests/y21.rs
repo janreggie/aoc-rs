@@ -1,11 +1,10 @@
-use aoc_rs::y21::solver;
+use aoc_rs::util::puzzles::puzzle_generator;
+use aoc_rs::util::puzzles::Puzzle;
 
-#[test]
-fn test_y21() {
-    let testcases = vec![
-        (
-            1,
-            "199
+pub fn examples() -> Vec<Puzzle> {
+    let puzzle = puzzle_generator(21);
+    vec![
+        puzzle(1, "199
 200
 208
 210
@@ -14,26 +13,14 @@ fn test_y21() {
 240
 269
 260
-263
-",
-            "7",
-            "5",
-        ),
-        (
-            2,
-            "forward 5
+263", "7", "5"),
+puzzle(2, "forward 5
 down 5
 forward 8
 up 3
 down 8
-forward 2
-",
-            "150",
-            "900",
-        ),
-        (
-            3,
-            "00100
+forward 2", "150", "900"),
+puzzle(3, "00100
 11110
 10110
 10111
@@ -44,14 +31,8 @@ forward 2
 10000
 11001
 00010
-01010
-",
-            "198",
-            "230",
-        ),
-        (
-            4,
-            "7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
+01010", "198", "230"),
+puzzle(4, "7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
 
 22 13 17 11  0
  8  2 23  4 24
@@ -69,13 +50,8 @@ forward 2
 10 16 15  9 19
 18  8 23 26 20
 22 11 13  6  5
- 2  0 12  3  7",
-            "4512",
-            "1924",
-        ),
-        (
-            5,
-            "0,9 -> 5,9
+ 2  0 12  3  7", "4512", "1924"),
+puzzle(5, "0,9 -> 5,9
 8,0 -> 0,8
 9,4 -> 3,4
 2,2 -> 2,1
@@ -84,43 +60,37 @@ forward 2
 0,9 -> 2,9
 3,4 -> 1,4
 0,0 -> 8,8
-5,5 -> 8,2
-",
-            "5",
-            "12",
-        ),
-        (6, "3,4,3,1,2", "5934", "26984457539"),
-        (7, "16,1,2,0,4,2,7,1,2,14", "37", "168"),
-        (
-            8,
-            "be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe
-edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec | fcgedb cgb dgebacf gc
-fgaebd cg bdaec gdafb agbcfd gdcbef bgcad gfac gcb cdgabef | cg cg fdcagb cbg
-fbegcd cbd adcefb dageb afcb bc aefdc ecdab fgdeca fcdbega | efabcd cedba gadfec cb
-aecbfdg fbg gf bafeg dbefa fcge gcbea fcaegb dgceab fcbdga | gecf egdcabf bgf bfgea
-fgeab ca afcebg bdacfeg cfaedg gcfdb baec bfadeg bafgc acf | gebdcfa ecba ca fadegcb
-dbcfg fgd bdegcaf fgec aegbdf ecdfab fbedc dacgb gdcebf gf | cefg dcbef fcge gbcadfe
-bdfegc cbegaf gecbf dfcage bdacg ed bedf ced adcbefg gebcd | ed bcgafe cdgba cbgef
-egadfb cdbfeg cegd fecab cgb gbdefca cg fgcdab egfdb bfceg | gbdfcae bgc cg cgb
-gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
-",
-            "26",
-            "61229",
-        ),
-        (
-            9,
-            "2199943210
+5,5 -> 8,2", "5", "12"),
+puzzle(6, "3,4,3,1,2", "5934", "26984457539"),
+puzzle(7, "16,1,2,0,4,2,7,1,2,14", "37", "168"),
+puzzle(8, "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab |
+cdfeb fcadb cdfeb cdbaf", "0", "5353"),
+puzzle(8, "be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb |
+fdgacbe cefdb cefbgd gcbe
+edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec |
+fcgedb cgb dgebacf gc
+fgaebd cg bdaec gdafb agbcfd gdcbef bgcad gfac gcb cdgabef |
+cg cg fdcagb cbg
+fbegcd cbd adcefb dageb afcb bc aefdc ecdab fgdeca fcdbega |
+efabcd cedba gadfec cb
+aecbfdg fbg gf bafeg dbefa fcge gcbea fcaegb dgceab fcbdga |
+gecf egdcabf bgf bfgea
+fgeab ca afcebg bdacfeg cfaedg gcfdb baec bfadeg bafgc acf |
+gebdcfa ecba ca fadegcb
+dbcfg fgd bdegcaf fgec aegbdf ecdfab fbedc dacgb gdcebf gf |
+cefg dcbef fcge gbcadfe
+bdfegc cbegaf gecbf dfcage bdacg ed bedf ced adcbefg gebcd |
+ed bcgafe cdgba cbgef
+egadfb cdbfeg cegd fecab cgb gbdefca cg fgcdab egfdb bfceg |
+gbdfcae bgc cg cgb
+gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc |
+fgae cfgab fg bagce", "26", "61229"),
+puzzle(9, "2199943210
 3987894921
 9856789892
 8767896789
-9899965678
-",
-            "15",
-            "1134",
-        ),
-        (
-            10,
-            "[({(<(())[]>[[{[]{<()<>>
+9899965678", "15", "1134"),
+puzzle(10, "[({(<(())[]>[[{[]{<()<>>
 [(()[<>])]({[<{<<[]>>(
 {([(<{}[<>[]}>{[]{[(<()>
 (((({<>}<{<{<>}{[]{[]{}
@@ -129,14 +99,8 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
 {<[[]]>}<{[{[{[]{()[[[]
 [<(<(<(<{}))><([]([]()
 <{([([[(<>()){}]>(<<{{
-<{([{{}}[<[[[<>{}]]]>[]]
-",
-            "26397",
-            "288957",
-        ),
-        (
-            11,
-            "5483143223
+<{([{{}}[<[[[<>{}]]]>[]]", "26397", "288957"),
+puzzle(11, "5483143223
 2745854711
 5264556173
 6141336146
@@ -145,14 +109,25 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
 2176841721
 6882881134
 4846848554
-5283751526
-",
-            "1656",
-            "195",
-        ),
-        (
-            12,
-            "fs-end
+5283751526", "1656", "195"),
+puzzle(12, "start-A
+start-b
+A-c
+A-b
+b-d
+A-end
+b-end", "10", "36"),
+puzzle(12, "dc-end
+HN-start
+start-kj
+dc-start
+dc-HN
+LN-dc
+HN-end
+kj-sa
+kj-HN
+kj-dc", "19", "103"),
+puzzle(12, "fs-end
 he-DX
 fs-he
 start-DX
@@ -169,27 +144,8 @@ start-pj
 he-WI
 zg-he
 pj-fs
-start-RW
-",
-            "226",
-            "3509",
-        ),
-        (
-            12,
-            "start-A
-start-b
-A-c
-A-b
-b-d
-A-end
-b-end
-",
-            "10",
-            "36",
-        ),
-        (
-            13,
-            "6,10
+start-RW", "226", "3509"),
+puzzle(13, "6,10
 0,14
 9,10
 0,3
@@ -209,14 +165,8 @@ b-end
 9,0
 
 fold along y=7
-fold along x=5
-",
-            "17",
-            "", // can't parse letters for now
-        ),
-        (
-            14,
-            "NNCB
+fold along x=5", "17", "□"),
+puzzle(14, "NNCB
 
 CH -> B
 HH -> N
@@ -233,14 +183,8 @@ BN -> B
 BB -> N
 BC -> B
 CC -> N
-CN -> C
-",
-            "1588",
-            "2188189693529",
-        ),
-        (
-            15,
-            "1163751742
+CN -> C", "1588", "2188189693529"),
+puzzle(15, "1163751742
 1381373672
 2136511328
 3694931569
@@ -249,57 +193,183 @@ CN -> C
 1359912421
 3125421639
 1293138521
-2311944581
-",
-            "40",
-            "315",
-        ),
-        (16, "8A004A801A8002F478", "16", ""),
-        (16, "A0016C880162017C3686B18A3D4780", "31", ""),
-        (16, "9C005AC2F8F0", "", "0"),
-        (16, "9C0141080250320F1802104A08", "", "1"),
-        (17, "target area: x=20..30, y=-10..-5", "45", "112"),
-        (
-            20,
-            "..#.#..#####.#.#.#.###.##.....###.##.#..###.####..#####..#....#..#..##..###..######.###...####..#..#####..##..#.#####...##.#.#..#.##..#.#......#.###.######.###.####...#.##.##..#..#..#####.....#.#....###..#.##......#.....#..#..#..##..#...##.######.####.####.#.#...#.......#..#.#.#...####.##.#......#..#...##.#.##..#...##.#.##..###.#......#.#.......#.#.#.####.###.##...#.....####.#..#..#.##.#....##..#.####....##...##..#...#......#.#.......#.......##..####..#...#.#.#...##..#.#..###..#####........#..####......#..#
+2311944581", "40", "315"),
+puzzle(16, "D2FE28", "6", ""),
+puzzle(16, "38006F45291200", "9", ""),
+puzzle(16, "EE00D40C823060", "14", ""),
+puzzle(16, "8A004A801A8002F478", "16", ""),
+puzzle(16, "620080001611562C8802118E34", "12", ""),
+puzzle(16, "C0015000016115A2E0802F182340", "23", ""),
+puzzle(16, "A0016C880162017C3686B18A3D4780", "31", ""),
+puzzle(16, "C200B40A82", "", "3"),
+puzzle(16, "04005AC33890", "", "54"),
+puzzle(16, "880086C3E88112", "", "7"),
+puzzle(16, "CE00C43D881120", "", "9"),
+puzzle(16, "D8005AC2A8F0", "", "1"),
+puzzle(16, "F600BC2D8F", "", "0"),
+puzzle(16, "9C005AC2F8F0", "", "0"),
+puzzle(16, "9C0141080250320F1802104A08", "", "1"),
+puzzle(17, "target area: x=20..30, y=-10..-5", "45", "112"),
+puzzle(18, "[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
+[[[5,[2,8]],4],[5,[[9,9],0]]]
+[6,[[[6,2],[5,6]],[[7,6],[4,7]]]]
+[[[6,[0,7]],[0,9]],[4,[9,[9,0]]]]
+[[[7,[6,4]],[3,[1,3]]],[[[5,5],1],9]]
+[[6,[[7,3],[3,2]]],[[[3,8],[5,7]],4]]
+[[[[5,4],[7,7]],8],[[8,3],8]]
+[[9,3],[[9,9],[6,[4,9]]]]
+[[2,[[7,7],7]],[[5,8],[[9,3],[0,2]]]]
+[[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]", "4140", ""),
+puzzle(19, "--- scanner 0 ---
+404,-588,-901
+528,-643,409
+-838,591,734
+390,-675,-793
+-537,-823,-458
+-485,-357,347
+-345,-311,381
+-661,-816,-575
+-876,649,763
+-618,-824,-621
+553,345,-567
+474,580,667
+-447,-329,318
+-584,868,-557
+544,-627,-890
+564,392,-477
+455,729,728
+-892,524,684
+-689,845,-530
+423,-701,434
+7,-33,-71
+630,319,-379
+443,580,662
+-789,900,-551
+459,-707,401
+
+--- scanner 1 ---
+686,422,578
+605,423,415
+515,917,-361
+-336,658,858
+95,138,22
+-476,619,847
+-340,-569,-846
+567,-361,727
+-460,603,-452
+669,-402,600
+729,430,532
+-500,-761,534
+-322,571,750
+-466,-666,-811
+-429,-592,574
+-355,545,-477
+703,-491,-529
+-328,-685,520
+413,935,-424
+-391,539,-444
+586,-435,557
+-364,-763,-893
+807,-499,-711
+755,-354,-619
+553,889,-390
+
+--- scanner 2 ---
+649,640,665
+682,-795,504
+-784,533,-524
+-644,584,-595
+-588,-843,648
+-30,6,44
+-674,560,763
+500,723,-460
+609,671,-379
+-555,-800,653
+-675,-892,-343
+697,-426,-610
+578,704,681
+493,664,-388
+-671,-858,530
+-667,343,800
+571,-461,-707
+-138,-166,112
+-889,563,-600
+646,-828,498
+640,759,510
+-630,509,768
+-681,-892,-333
+673,-379,-804
+-742,-814,-386
+577,-820,562
+
+--- scanner 3 ---
+-589,542,597
+605,-692,669
+-500,565,-823
+-660,373,557
+-458,-679,-417
+-488,449,543
+-626,468,-788
+338,-750,-386
+528,-832,-391
+562,-778,733
+-938,-730,414
+543,643,-506
+-524,371,-870
+407,773,750
+-104,29,83
+378,-903,-323
+-778,-728,485
+426,699,580
+-438,-605,-362
+-469,-447,-387
+509,732,623
+647,635,-688
+-868,-804,481
+614,-800,639
+595,780,-596
+
+--- scanner 4 ---
+727,592,562
+-293,-554,779
+441,611,-461
+-714,465,-776
+-743,427,-804
+-660,-479,-426
+832,-632,460
+927,-485,-438
+408,393,-506
+466,436,-512
+110,16,151
+-258,-428,682
+-393,719,612
+-211,-452,876
+808,-476,-593
+-575,615,604
+-485,667,467
+-680,325,-822
+-627,-443,-432
+872,-547,-609
+833,512,582
+807,604,487
+839,-516,451
+891,-625,532
+-652,-548,-490
+30,-46,-14", "79", ""),
+puzzle(20, "..#.#..#####.#.#.#.###.##.....###.##.#..###.####..#####..#....#..#..##..##
+#..######.###...####..#..#####..##..#.#####...##.#.#..#.##..#.#......#.###
+.######.###.####...#.##.##..#..#..#####.....#.#....###..#.##......#.....#.
+.#..#..##..#...##.######.####.####.#.#...#.......#..#.#.#...####.##.#.....
+.#..#...##.#.##..#...##.#.##..###.#......#.#.......#.#.#.####.###.##...#..
+...####.#..#..#.##.#....##..#.####....##...##..#...#......#.#.......#.....
+..##..####..#...#.#.#...##..#.#..###..#####........#..####......#..#
 
 #..#.
 #....
 ##..#
 ..#..
-..###
-",
-            "35",
-            "3351",
-        ),
-        (
-            21,
-            "Player 1 starting position: 4
-Player 2 starting position: 8
-",
-            "739785",
-            "444356092776315",
-        ),
-    ];
-    for (day, input, ans1, ans2) in testcases {
-        test_day(day, input, ans1, ans2);
-    }
-}
-
-fn test_day(day: u8, input: &str, ans1: &str, ans2: &str) {
-    eprintln!("Testing day {}", day);
-    let input = split(input);
-    let (r1, r2) = solver(day)(input).unwrap();
-    if ans1 != "" {
-        eprintln!("Checking if ans1 matches expected");
-        assert_eq!(ans1, r1.unwrap());
-    }
-    if ans2 != "" {
-        eprintln!("Checking if ans2 matches expected");
-        assert_eq!(ans2, r2.unwrap());
-    }
-}
-
-fn split(str: &str) -> Vec<String> {
-    str.trim_matches('\n').split('\n').map(|s| s.to_string()).collect()
+..###", "35", "3351"),
+puzzle(21, "Player 1 starting position: 4
+Player 2 starting position: 8", "739785", "444356092776315"),
+    ]
 }

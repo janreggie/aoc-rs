@@ -38,7 +38,7 @@ fn main() {
         .expect("day is required")
         .parse()
         .expect("day must be numeric");
-    let solver = util::series(year)(day);
+    let solver = util::solve(year)(day);
 
     // Read stdin
     let lines = read_lines();
