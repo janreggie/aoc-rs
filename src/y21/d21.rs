@@ -159,9 +159,9 @@ pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
         .and_then(|p| p.parse::<u32>().ok())
         .context("could not parse player 1 starting position")?;
     let input_2 = lines[1]
-        .strip_prefix("Player 1 starting position: ")
+        .strip_prefix("Player 2 starting position: ")
         .and_then(|p| p.parse::<u32>().ok())
-        .context("could not parse player 1 starting position")?;
+        .context("could not parse player 2 starting position")?;
 
     // Part 1 is relatively straightforward
     let (mut score_1, mut score_2) = (0, 0);

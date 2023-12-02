@@ -43,12 +43,7 @@ impl Knot {
     }
 }
 
-pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
-    if lines.len() != 1 {
-        bail!("expected only 1 line as input, got {}", lines.len())
-    }
-    let input = lines.into_iter().next().unwrap();
-
+fn solve_part_1(input: &str) -> Result<String> {
     // Part 1: Do the sequence as usual; multiply the first 2 values
     let mut knot = Knot::new();
     let lengths = vectors::split_and_trim(&input, ',');
@@ -57,8 +52,17 @@ pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     for length in &lengths {
         knot.twist(*length);
     }
-    let ans1 =
-        Ok((knot.numbers[0] as u32 * knot.numbers[1] as u32).to_string());
+
+    Ok((knot.numbers[0] as u32 * knot.numbers[1] as u32).to_string())
+}
+
+pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
+    if lines.len() != 1 {
+        bail!("expected only 1 line as input, got {}", lines.len())
+    }
+    let input = lines.into_iter().next().unwrap();
+
+    let ans1 = solve_part_1(&input);
 
     // Part 2: Interpret input as ascii, with additional lengths, 64 times, etc.
     let mut lengths =

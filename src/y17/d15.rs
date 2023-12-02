@@ -37,7 +37,7 @@ pub fn solve(lines: Vec<String>) -> Result<(Result<String>, Result<String>)> {
     let start_b = input
         .next()
         .unwrap()
-        .strip_prefix("Generator A starts with ")
+        .strip_prefix("Generator B starts with ")
         .and_then(|v| v.parse::<u64>().ok())
         .context("could not parse starting value for Generator B")?;
 
