@@ -1,24 +1,28 @@
-use std::fs;
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use anyhow::{bail, Context, Result};
 use aoc_rs::util::puzzles::Puzzle;
+use sscanf::sscanf;
 
 /// Reads input filename and output filename. Assume that output_filename contains at least two lines.
 fn read_puzzle_from_files(
     year: u8,
     day: u8,
-    input_filename: &str,
-    output_filename: &str,
+    input_file: &PathBuf,
+    output_file: &PathBuf,
 ) -> Result<Puzzle> {
-    let input_data = fs::read_to_string(input_filename).with_context(|| {
-        format!("could not read input file {}", input_filename)
+    let input_data = fs::read_to_string(input_file).with_context(|| {
+        format!("could not read input file {}", input_file.to_str().unwrap())
     })?;
-    let answers = fs::read_to_string(output_filename).with_context(|| {
-        format!("could not read output file {}", output_filename)
+    let answers = fs::read_to_string(output_file).with_context(|| {
+        format!("could not read output file {}", output_file.to_str().unwrap())
     })?;
     let answers = answers.split('\n').collect::<Vec<_>>();
     if answers.len() < 2 {
-        bail!("output file {} too short", output_filename);
+        bail!("output file {} too short", output_file.to_str().unwrap());
     }
 
     Ok(Puzzle {
@@ -32,6 +36,28 @@ fn read_puzzle_from_files(
 
 #[test]
 fn test_inputs_and_outputs() {
-    // TODO: The needful
-    ()
+    // Navigate through the folder
+    let root_folder = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let inputs_folder = root_folder.join("tests/inputs");
+    let outputs_folder = root_folder.join("tests/outputs");
+
+    let input_paths = inputs_folder.read_dir().unwrap_or_else(|_| {
+        panic!(
+            "could not read input folder {}",
+            inputs_folder.to_str().unwrap()
+        )
+    });
+
+    for path in input_paths {
+        let path = path.unwrap();
+        let input_file = path.path();
+        let file_name = path.file_name();
+        let (year, day, _) =
+            sscanf!(file_name, "y{}-d{}{:/.+/}", u8, u8).unwrap();
+        let output_file = outputs_folder.join(file_name);
+
+        let puzzle =
+            read_puzzle_from_files(year, day, &input_file, &output_file);
+        util::test_puzzle(example);
+    }
 }
