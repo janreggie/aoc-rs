@@ -4,7 +4,7 @@ use std::{
 };
 
 use anyhow::{bail, Context, Result};
-use aoc_rs::util::puzzles::Puzzle;
+use aoc_rs::util::{self, puzzles::Puzzle};
 use sscanf::sscanf;
 
 /// Reads input filename and output filename. Assume that output_filename contains at least two lines.
@@ -52,12 +52,19 @@ fn test_inputs_and_outputs() {
         let path = path.unwrap();
         let input_file = path.path();
         let file_name = path.file_name();
-        let (year, day, _) =
-            sscanf!(file_name, "y{}-d{}{:/.+/}", u8, u8).unwrap();
+        let (year, day, _) = sscanf!(
+            file_name.to_str().unwrap(),
+            "y{}-d{}{:/.+/}",
+            u8,
+            u8,
+            &str
+        )
+        .unwrap();
         let output_file = outputs_folder.join(file_name);
 
         let puzzle =
-            read_puzzle_from_files(year, day, &input_file, &output_file);
-        util::test_puzzle(example);
+            read_puzzle_from_files(year, day, &input_file, &output_file)
+                .unwrap();
+        util::test_puzzle(&puzzle);
     }
 }
