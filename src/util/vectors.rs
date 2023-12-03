@@ -1,4 +1,5 @@
 use anyhow::{bail, Result};
+use itertools::Itertools;
 use std::any;
 use std::fmt;
 use std::str::FromStr;
@@ -90,10 +91,7 @@ pub fn split_and_trim(str: &str, delim: char) -> Vec<String> {
 
 /// split_and_trim but doesn't allocate new strings.
 pub fn split_and_trim_borrowed(str: &str, delim: char) -> Vec<&str> {
-    str.trim_matches(delim)
-        .split(delim)
-        .filter(|s| !s.is_empty())
-        .collect()
+    str.trim_matches(delim).split(delim).filter(|s| !s.is_empty()).collect()
 }
 
 /// Groups together strings which aren't empty.
@@ -116,4 +114,39 @@ pub fn group(strs: Vec<String>) -> Vec<Vec<String>> {
     }
 
     result
+}
+
+/// A Grid is a width x height "grid" of characters. Grid[0] is the first row, and Grid[0][0] is the topleftmost character.
+/// Usually found in puzzles such as [y21-d20](https://adventofcode.com/2021/day/20) and [y23-d03](https://adventofcode.com/2023/day/3).
+/// TODO: Move this to util/grid.rs, then create a trait for GridLike, with a custom method for turning char -> whatever.
+pub struct Grid {
+    pub width: usize,
+    pub height: usize,
+    pub chars: Vec<Vec<char>>,
+}
+
+impl Grid {
+    /// Only returns a Grid if input is not empty, and all lines have the same length.
+    pub fn new(input: &Vec<String>) -> Option<Grid> {
+        if input.len() == 0 || input[0].len() == 0 {
+            return None;
+        }
+        let height = input.len();
+        let width = input[0].len();
+        let chars = input
+            .iter()
+            .map(|line| {
+                if line.len() != width {
+                    None
+                } else {
+                    Some(line.chars().collect::<Vec<char>>())
+                }
+            })
+            .collect::<Option<Vec<_>>>();
+
+        match chars {
+            None => None,
+            Some(chars) => Some(Grid { width, height, chars }),
+        }
+    }
 }
