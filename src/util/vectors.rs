@@ -1,5 +1,4 @@
 use anyhow::{bail, Result};
-use itertools::Itertools;
 use std::any;
 use std::fmt;
 use std::str::FromStr;

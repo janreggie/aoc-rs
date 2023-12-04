@@ -1,11 +1,11 @@
 use std::vec;
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result};
 use itertools::Itertools;
 
 use crate::util::vectors::Grid;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum SchematicChar {
     // Period
     Empty,
@@ -180,18 +180,94 @@ impl Schematic {
             .filter_map(|(pos_x, pos_y)| match self.chars[pos_y][pos_x] {
                 SchematicChar::Digit(_) => Some((pos_x, pos_y)),
                 _ => None,
-            })
-            .collect::<Vec<_>>();
+            });
+        let positions_by_row = positions
+            .group_by(|(_pos_x, pos_y)| *pos_y)
+            .into_iter()
+            .map(|(pos_y, group)| (pos_y, group.collect()))
+            .collect::<Vec<(usize, Vec<_>)>>();
 
         // Now, do some analysis.
-        // The obvious cases: too short, or too long
-        if positions.len() < 2 || positions.len() > 6 {
-            return None;
+        match positions_by_row.len() {
+            0 => None,
+            1 => {
+                let (_, positions) = &positions_by_row[0];
+                // The only way for this to work is if the two digits have a gap in between
+                if positions.len() == 2
+                    && positions[0].0.abs_diff(positions[1].0) == 2
+                {
+                    Some((
+                        self.get_number(positions[0]),
+                        self.get_number(positions[1]),
+                    ))
+                } else {
+                    None
+                }
+            }
+            2 => {
+                // We have to make sure that each row has *one and only one* part number.
+                // This lambda function assumes that positions contains digits.
+                let check_if_row_has_only_one_part_number =
+                    |positions: &Vec<(usize, usize)>| match positions.len() {
+                        0 => false,
+                        1 => true,
+                        2 => positions[0].0.abs_diff(positions[1].0) == 1,
+                        3 => true,
+                        _ => false,
+                    };
+                let ((_, first_positions), (_, second_positions)) =
+                    (&positions_by_row[0], &positions_by_row[1]);
+                if check_if_row_has_only_one_part_number(first_positions)
+                    && check_if_row_has_only_one_part_number(second_positions)
+                {
+                    Some((
+                        self.get_number(first_positions[0]),
+                        self.get_number(second_positions[0]),
+                    ))
+                } else {
+                    None
+                }
+            }
+            _ => None, // invalid i.e., shouldn't happen
+        }
+    }
+
+    /// Returns the part number at the given position, or 0 if it doesn't exist
+    fn get_number(&self, (pos_x, pos_y): (usize, usize)) -> u32 {
+        let get_digit = |pos_x: usize| {
+            self.chars.get(pos_y).and_then(|row| {
+                row.get(pos_x).and_then(|c| match c {
+                    SchematicChar::Digit(d) => Some(*d),
+                    _ => None,
+                })
+            })
+        };
+        let current_digit = get_digit(pos_x);
+        if current_digit.is_none() {
+            return 0;
         }
 
-        // If there's two, check if they aren't the same number
-        if positions.len() == 2 {}
-        todo!("unimplemented lol")
+        // Numbers can only be at most three digits.
+        // The "if pos_x >= 1" checks are so that the numbers don't underflow.
+        let mut result = current_digit.unwrap();
+        if pos_x >= 1 {
+            if let Some(d) = get_digit(pos_x - 1) {
+                result = d * 10 + result;
+                if pos_x >= 2 {
+                    if let Some(d) = get_digit(pos_x - 2) {
+                        result = d * 100 + result;
+                    }
+                }
+            }
+        }
+        if let Some(d) = get_digit(pos_x + 1) {
+            result = result * 10 + d;
+            if let Some(d) = get_digit(pos_x + 2) {
+                result = result * 10 + d;
+            }
+        }
+
+        result
     }
 }
 
@@ -202,7 +278,7 @@ fn test_part_numbers_per_row() {
             //123456789
             "467..114..".to_string(),
             "...*......".to_string(),
-            "..35..6333".to_string(),
+            "..35..633.".to_string(),
         ])
         .unwrap(),
     );
@@ -216,9 +292,40 @@ fn test_part_numbers_per_row() {
         vec![
             vec![(467, (0, 2)), (114, (5, 7))],
             vec![],
-            vec![(35, (2, 3)), (6333, (6, 9))]
+            vec![(35, (2, 3)), (633, (6, 8))]
         ]
     )
+}
+
+#[test]
+fn test_find_surrounding_number_pair() {
+    let schematic = Schematic::new(
+        &Grid::new(&vec![
+            "467..114..".to_string(),
+            "...*......".to_string(),
+            "..35..633.".to_string(),
+            "......#...".to_string(),
+            "617*......".to_string(),
+            ".....+.58.".to_string(),
+            "..592.....".to_string(),
+            "......755.".to_string(),
+            "...$.*....".to_string(),
+            ".664.598..".to_string(),
+        ])
+        .unwrap(),
+    );
+    assert_eq!(schematic.get_number((0, 0)), 467);
+
+    let inputs = vec![(3, 1), (5, 8)];
+    let outputs = vec![Some((467, 35)), Some((755, 598))];
+    assert_eq!(
+        inputs
+            .into_iter()
+            .map(|(pos_x, pos_y)| schematic
+                .find_surrounding_number_pair(pos_x, pos_y))
+            .collect::<Vec<_>>(),
+        outputs
+    );
 }
 
 fn solve_part_1(schematic: &Schematic) -> Result<String> {
@@ -241,14 +348,32 @@ fn solve_part_1(schematic: &Schematic) -> Result<String> {
 }
 
 fn solve_part_2(schematic: &Schematic) -> Result<String> {
-    let all_gear_positions =
-        schematic.list_symbols().into_iter().filter_map(|(c, pos)| match c {
-            SchematicChar::Symbol('*') => Some(pos),
+    let all_gear_positions = schematic
+        .list_symbols()
+        .into_iter()
+        .filter_map(|(c, pos)| match c {
+            SchematicChar::Symbol(s) => {
+                if s == '*' {
+                    Some(pos)
+                } else {
+                    None
+                }
+            }
             _ => None,
-        });
-    let all_gear_ratios = all_gear_positions.filter_map(|(pos_x, pos_y)| {
-        schematic.find_surrounding_number_pair(pos_x, pos_y)
-    });
+        })
+        .collect::<Vec<_>>();
+    let all_gear_ratios = all_gear_positions
+        .into_iter()
+        .filter_map(|(pos_x, pos_y)| {
+            schematic
+                .find_surrounding_number_pair(pos_x, pos_y)
+                .and_then(|pair| Some(((pos_x, pos_y), pair)))
+        })
+        .collect::<Vec<_>>();
+    for (pos, pair) in &all_gear_ratios {
+        println!("{:?} has pair {:?}", pos, pair);
+    }
+    let all_gear_ratios = all_gear_ratios.into_iter().map(|(_, pair)| pair);
     let ans2 = all_gear_ratios.map(|(num_1, num_2)| num_1 * num_2).sum::<u32>();
     Ok(ans2.to_string())
 }
