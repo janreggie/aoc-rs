@@ -1,5 +1,6 @@
 use aoc_rs::util::puzzles::puzzle_generator;
 use aoc_rs::util::puzzles::Puzzle;
+use aoc_rs::util::test_puzzle;
 
 pub fn examples() -> Vec<Puzzle> {
     let puzzle = puzzle_generator(23);
@@ -100,4 +101,12 @@ humidity-to-location map:
             "46",
         ),
     ]
+}
+
+#[test]
+fn test_examples() {
+    let puzzles = examples();
+    for puzzle in &puzzles {
+        test_puzzle(puzzle);
+    }
 }

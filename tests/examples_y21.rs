@@ -1,5 +1,6 @@
 use aoc_rs::util::puzzles::puzzle_generator;
 use aoc_rs::util::puzzles::Puzzle;
+use aoc_rs::util::test_puzzle;
 
 pub fn examples() -> Vec<Puzzle> {
     let puzzle = puzzle_generator(21);
@@ -209,4 +210,12 @@ puzzle(20, "..#.#..#####.#.#.#.###.##.....###.##.#..###.####..#####..#....#..#..
 puzzle(21, "Player 1 starting position: 4
 Player 2 starting position: 8", "739785", "444356092776315"),
     ]
+}
+
+#[test]
+fn test_examples() {
+    let puzzles = examples();
+    for puzzle in &puzzles {
+        test_puzzle(puzzle);
+    }
 }

@@ -1,5 +1,6 @@
 use aoc_rs::util::puzzles::puzzle_generator;
 use aoc_rs::util::puzzles::Puzzle;
+use aoc_rs::util::test_puzzle;
 
 pub fn examples() -> Vec<Puzzle> {
     let puzzle = puzzle_generator(17);
@@ -133,4 +134,12 @@ Generator B starts with 8921",
         ),
         // puzzle(16, "s1,x3/4,pe/b", "baedc", "ceadb"), // TODO: Unit test
     ]
+}
+
+#[test]
+fn test_examples() {
+    let puzzles = examples();
+    for puzzle in &puzzles {
+        test_puzzle(puzzle);
+    }
 }
