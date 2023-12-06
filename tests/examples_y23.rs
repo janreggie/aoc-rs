@@ -100,6 +100,13 @@ humidity-to-location map:
             "35",
             "46",
         ),
+        puzzle(
+            6,
+            "Time:      7  15   30
+Distance:  9  40  200",
+            "288",
+            "71503",
+        ),
     ]
 }
 
