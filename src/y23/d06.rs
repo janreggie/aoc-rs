@@ -1,5 +1,6 @@
 use crate::util::vectors::split_and_trim_borrowed;
 use anyhow::{bail, Context, Result};
+use num::integer::Roots;
 
 struct Race {
     time: u64,
@@ -7,17 +8,55 @@ struct Race {
 }
 
 impl Race {
+    /// Returns whether holding the button in `time` milliseconds will cause the player to win
+    fn check_win(&self, time: u64) -> bool {
+        time * (self.time - time) > self.distance
+    }
+
     fn count_possible_ways_to_win(&self) -> u64 {
+        // If time is small enough, doing extra work serves nobody.
+        if self.time < 100 {
+            return (0..=self.time)
+                .step_by(1)
+                .filter(|time| self.check_win(*time))
+                .count() as u64;
+        }
+
         // There is a closed-form solution to this.
         // Let x be the number of milliseconds to hold the button at the beginning.
         // Then, we should count the number of x's such that
         //   x*(time-x) > distance
         //   ==>  x^2-time*x+distance < 0
-        // ...but for now, we'll just count it in linear time.
-        (0..self.time)
-            .step_by(1)
-            .filter(|time| time * (self.time - time) > self.distance)
-            .count() as u64
+        let (a, b, c) = (1 as i64, -(self.time as i64), self.distance as i64);
+        let determinant = b * b - 4 * a * c;
+        if determinant <= 0 {
+            return 0;
+        }
+        let (x_1, x_2) = (
+            ((-b - determinant.sqrt()) / (2 * a)),
+            ((-b + determinant.sqrt()) / (2 * a)),
+        );
+        let keep_in_bounds = |x: i64| {
+            if x < 0 {
+                0
+            } else if (x as u64) > self.time {
+                self.time
+            } else {
+                x as u64
+            }
+        };
+        let (mut lower_bound, mut upper_bound) =
+            (keep_in_bounds(x_1 - 1), keep_in_bounds(x_2 + 1));
+
+        // Do some checks to make sure [lower_bound,upper_bound] win
+        while !self.check_win(lower_bound) {
+            lower_bound += 1;
+        }
+        while !self.check_win(upper_bound) {
+            upper_bound -= 1;
+        }
+
+        upper_bound - lower_bound + 1
     }
 }
 
