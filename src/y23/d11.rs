@@ -1,6 +1,6 @@
 use std::{collections::HashSet, fmt::Display};
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result};
 
 use crate::util::vectors::Grid;
 
