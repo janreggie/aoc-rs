@@ -265,7 +265,6 @@ impl Springs {
             remaining_unknowns as u64 + 1,
             damaged_groups.len() as u64,
         )
-        // }
     }
 
     fn count_arrangements_iter_if_first_is_damaged(
@@ -301,53 +300,60 @@ impl Springs {
     }
 }
 
-#[test]
-fn test_spring_counts() {
-    let cases = vec![
-        ("???.### 1,1,3", 1),
-        (".??..??...?##. 1,1,3", 4),
-        ("?#?#?#?#?#?#?#? 1,3,1,6", 1),
-        ("????.#...#... 4,1,1", 1),
-        ("????.######..#####. 1,6,5", 4),
-        ("?###???????? 3,2,1", 10),
-    ];
-    let cases = cases.into_iter().map(|(s, c)| (Springs::new(s).unwrap(), c));
-    for (springs, count) in cases {
-        println!("{:?} must have {:?} arrangements", &springs, count);
-        assert_eq!(springs.count_arrangements(), count)
-    }
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn test_spring_counts_all_unknowns() {
-    let cases = vec![
-        ("? 1", 1),
-        ("??? 1", 3),
-        ("?????? 2", 5),
-        ("?????? 1,1", 10),
-        ("?????? 1,2", 6),
-    ];
-    let cases = cases.into_iter().map(|(s, c)| (Springs::new(s).unwrap(), c));
-    for (springs, count) in cases {
-        println!("{:?} must have {:?} arrangements", &springs, count);
-        assert_eq!(springs.count_arrangements(), count)
+    #[test]
+    fn test_spring_counts() {
+        let cases = vec![
+            ("???.### 1,1,3", 1),
+            (".??..??...?##. 1,1,3", 4),
+            ("?#?#?#?#?#?#?#? 1,3,1,6", 1),
+            ("????.#...#... 4,1,1", 1),
+            ("????.######..#####. 1,6,5", 4),
+            ("?###???????? 3,2,1", 10),
+        ];
+        let cases =
+            cases.into_iter().map(|(s, c)| (Springs::new(s).unwrap(), c));
+        for (springs, count) in cases {
+            println!("{:?} must have {:?} arrangements", &springs, count);
+            assert_eq!(springs.count_arrangements(), count)
+        }
     }
-}
 
-#[test]
-fn test_spring_counts_unfolded() {
-    let test_cases = vec![
-        (Springs::new("???.### 1,1,3").unwrap(), 1),
-        (Springs::new(".??..??...?##. 1,1,3").unwrap(), 16384),
-        (Springs::new("?#?#?#?#?#?#?#? 1,3,1,6").unwrap(), 1),
-        (Springs::new("????.#...#... 4,1,1").unwrap(), 16),
-        (Springs::new("????.######..#####. 1,6,5").unwrap(), 2500),
-        (Springs::new("?###???????? 3,2,1").unwrap(), 506250),
-    ];
-    for (springs, count) in test_cases {
-        let mut springs = springs;
-        springs.unfold();
-        assert_eq!(springs.count_arrangements(), count);
+    #[test]
+    fn test_spring_counts_all_unknowns() {
+        let cases = vec![
+            ("? 1", 1),
+            ("??? 1", 3),
+            ("?????? 2", 5),
+            ("?????? 1,1", 10),
+            ("?????? 1,2", 6),
+        ];
+        let cases =
+            cases.into_iter().map(|(s, c)| (Springs::new(s).unwrap(), c));
+        for (springs, count) in cases {
+            println!("{:?} must have {:?} arrangements", &springs, count);
+            assert_eq!(springs.count_arrangements(), count)
+        }
+    }
+
+    #[test]
+    fn test_spring_counts_unfolded() {
+        let test_cases = vec![
+            (Springs::new("???.### 1,1,3").unwrap(), 1),
+            (Springs::new(".??..??...?##. 1,1,3").unwrap(), 16384),
+            (Springs::new("?#?#?#?#?#?#?#? 1,3,1,6").unwrap(), 1),
+            (Springs::new("????.#...#... 4,1,1").unwrap(), 16),
+            (Springs::new("????.######..#####. 1,6,5").unwrap(), 2500),
+            (Springs::new("?###???????? 3,2,1").unwrap(), 506250),
+        ];
+        for (springs, count) in test_cases {
+            let mut springs = springs;
+            springs.unfold();
+            assert_eq!(springs.count_arrangements(), count);
+        }
     }
 }
 

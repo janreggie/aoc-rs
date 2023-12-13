@@ -40,14 +40,19 @@ impl History {
     }
 }
 
-#[test]
-fn test_next_from_history() {
-    let history = History::new("0 3 6 9 12 15").unwrap();
-    assert_eq!(history.next(), 18);
-    let history = History::new("1 3 6 10 15 21").unwrap();
-    assert_eq!(history.next(), 28);
-    let history = History::new("10 13 16 21 30 45").unwrap();
-    assert_eq!(history.next(), 68);
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_next_from_history() {
+        let history = History::new("0 3 6 9 12 15").unwrap();
+        assert_eq!(history.next(), 18);
+        let history = History::new("1 3 6 10 15 21").unwrap();
+        assert_eq!(history.next(), 28);
+        let history = History::new("10 13 16 21 30 45").unwrap();
+        assert_eq!(history.next(), 68);
+    }
 }
 
 fn solve_part_1(histories: &Vec<History>) -> Result<String> {

@@ -39,11 +39,6 @@ fn new_element(input: &str) -> Option<Element> {
     }
 }
 
-#[test]
-fn test_element_creation() {
-    assert_eq!(new_element("ABC"), Some(['A', 'B', 'C']))
-}
-
 struct Network {
     nodes: HashMap<Element, (Element, Element)>,
 }

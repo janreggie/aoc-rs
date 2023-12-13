@@ -60,19 +60,6 @@ impl Race {
     }
 }
 
-#[test]
-fn test_race_count_possible_ways_to_win() {
-    let races = vec![
-        Race { time: 7, distance: 9 },
-        Race { time: 15, distance: 40 },
-        Race { time: 30, distance: 200 },
-    ];
-    let answers = vec![4, 8, 9];
-    for ii in 0..3 {
-        assert_eq!(races[ii].count_possible_ways_to_win(), answers[ii]);
-    }
-}
-
 struct Races {
     races: Vec<Race>,
 }
@@ -133,6 +120,24 @@ impl Races {
             distances.into_iter().collect::<String>().parse::<u64>().unwrap();
 
         Race { time, distance }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_race_count_possible_ways_to_win() {
+        let races = vec![
+            Race { time: 7, distance: 9 },
+            Race { time: 15, distance: 40 },
+            Race { time: 30, distance: 200 },
+        ];
+        let answers = vec![4, 8, 9];
+        for ii in 0..3 {
+            assert_eq!(races[ii].count_possible_ways_to_win(), answers[ii]);
+        }
     }
 }
 

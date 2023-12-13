@@ -271,61 +271,66 @@ impl Schematic {
     }
 }
 
-#[test]
-fn test_part_numbers_per_row() {
-    let schematic = Schematic::new(
-        &Grid::new(&vec![
-            //123456789
-            "467..114..".to_string(),
-            "...*......".to_string(),
-            "..35..633.".to_string(),
-        ])
-        .unwrap(),
-    );
-    let part_numbers = schematic
-        .chars
-        .iter()
-        .map(Schematic::list_part_numbers_per_row)
-        .collect::<Vec<_>>();
-    assert_eq!(
-        part_numbers,
-        vec![
-            vec![(467, (0, 2)), (114, (5, 7))],
-            vec![],
-            vec![(35, (2, 3)), (633, (6, 8))]
-        ]
-    )
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn test_find_surrounding_number_pair() {
-    let schematic = Schematic::new(
-        &Grid::new(&vec![
-            "467..114..".to_string(),
-            "...*......".to_string(),
-            "..35..633.".to_string(),
-            "......#...".to_string(),
-            "617*......".to_string(),
-            ".....+.58.".to_string(),
-            "..592.....".to_string(),
-            "......755.".to_string(),
-            "...$.*....".to_string(),
-            ".664.598..".to_string(),
-        ])
-        .unwrap(),
-    );
-    assert_eq!(schematic.get_number((0, 0)), 467);
+    #[test]
+    fn test_part_numbers_per_row() {
+        let schematic = Schematic::new(
+            &Grid::new(&vec![
+                //123456789
+                "467..114..".to_string(),
+                "...*......".to_string(),
+                "..35..633.".to_string(),
+            ])
+            .unwrap(),
+        );
+        let part_numbers = schematic
+            .chars
+            .iter()
+            .map(Schematic::list_part_numbers_per_row)
+            .collect::<Vec<_>>();
+        assert_eq!(
+            part_numbers,
+            vec![
+                vec![(467, (0, 2)), (114, (5, 7))],
+                vec![],
+                vec![(35, (2, 3)), (633, (6, 8))]
+            ]
+        )
+    }
 
-    let inputs = vec![(3, 1), (5, 8)];
-    let outputs = vec![Some((467, 35)), Some((755, 598))];
-    assert_eq!(
-        inputs
-            .into_iter()
-            .map(|(pos_x, pos_y)| schematic
-                .find_surrounding_number_pair(pos_x, pos_y))
-            .collect::<Vec<_>>(),
-        outputs
-    );
+    #[test]
+    fn test_find_surrounding_number_pair() {
+        let schematic = Schematic::new(
+            &Grid::new(&vec![
+                "467..114..".to_string(),
+                "...*......".to_string(),
+                "..35..633.".to_string(),
+                "......#...".to_string(),
+                "617*......".to_string(),
+                ".....+.58.".to_string(),
+                "..592.....".to_string(),
+                "......755.".to_string(),
+                "...$.*....".to_string(),
+                ".664.598..".to_string(),
+            ])
+            .unwrap(),
+        );
+        assert_eq!(schematic.get_number((0, 0)), 467);
+
+        let inputs = vec![(3, 1), (5, 8)];
+        let outputs = vec![Some((467, 35)), Some((755, 598))];
+        assert_eq!(
+            inputs
+                .into_iter()
+                .map(|(pos_x, pos_y)| schematic
+                    .find_surrounding_number_pair(pos_x, pos_y))
+                .collect::<Vec<_>>(),
+            outputs
+        );
+    }
 }
 
 fn solve_part_1(schematic: &Schematic) -> Result<String> {

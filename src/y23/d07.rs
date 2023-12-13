@@ -162,26 +162,6 @@ impl Hand {
     }
 }
 
-#[test]
-fn test_hand_get_type() {
-    let hands = vec![
-        (Hand::new("32T3K").unwrap(), HandType::OnePair),
-        (Hand::new("KK677").unwrap(), HandType::TwoPair),
-        (Hand::new("KTJJT").unwrap(), HandType::TwoPair),
-        (Hand::new("T55J5").unwrap(), HandType::ThreeOfAKind),
-        (Hand::new("QQQJA").unwrap(), HandType::ThreeOfAKind),
-    ];
-    for (hand, hand_type) in hands {
-        assert_eq!(
-            hand.get_type(),
-            hand_type,
-            "Test if {:?} is of type {:?}",
-            &hand,
-            &hand_type
-        );
-    }
-}
-
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 enum HandType {
     HighCard,
@@ -220,43 +200,68 @@ impl PartialEq for HandAndBid {
 }
 impl Eq for HandAndBid {}
 
-#[test]
-fn test_hand_ordering() {
-    let hands_and_bids = vec![
-        HandAndBid::new("32T3K 765").unwrap(),
-        HandAndBid::new("KTJJT 220").unwrap(),
-        HandAndBid::new("KK677 28").unwrap(),
-        HandAndBid::new("T55J5 684").unwrap(),
-        HandAndBid::new("QQQJA 483").unwrap(),
-    ];
-    assert_eq!(
-        hands_and_bids[0].hand.cmp_1(&hands_and_bids[1].hand),
-        Ordering::Less,
-        "Check if {:?} < {:?}",
-        hands_and_bids[0],
-        hands_and_bids[1]
-    );
-    assert_eq!(
-        hands_and_bids[1].hand.cmp_1(&hands_and_bids[2].hand),
-        Ordering::Less,
-        "Check if {:?} < {:?}",
-        hands_and_bids[1],
-        hands_and_bids[2]
-    );
-    assert_eq!(
-        hands_and_bids[2].hand.cmp_1(&hands_and_bids[3].hand),
-        Ordering::Less,
-        "Check if {:?} < {:?}",
-        hands_and_bids[2],
-        hands_and_bids[3]
-    );
-    assert_eq!(
-        hands_and_bids[3].hand.cmp_1(&hands_and_bids[4].hand),
-        Ordering::Less,
-        "Check if {:?} < {:?}",
-        hands_and_bids[3],
-        hands_and_bids[4]
-    );
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_hand_get_type() {
+        let hands = vec![
+            (Hand::new("32T3K").unwrap(), HandType::OnePair),
+            (Hand::new("KK677").unwrap(), HandType::TwoPair),
+            (Hand::new("KTJJT").unwrap(), HandType::TwoPair),
+            (Hand::new("T55J5").unwrap(), HandType::ThreeOfAKind),
+            (Hand::new("QQQJA").unwrap(), HandType::ThreeOfAKind),
+        ];
+        for (hand, hand_type) in hands {
+            assert_eq!(
+                hand.get_type(),
+                hand_type,
+                "Test if {:?} is of type {:?}",
+                &hand,
+                &hand_type
+            );
+        }
+    }
+
+    #[test]
+    fn test_hand_ordering() {
+        let hands_and_bids = vec![
+            HandAndBid::new("32T3K 765").unwrap(),
+            HandAndBid::new("KTJJT 220").unwrap(),
+            HandAndBid::new("KK677 28").unwrap(),
+            HandAndBid::new("T55J5 684").unwrap(),
+            HandAndBid::new("QQQJA 483").unwrap(),
+        ];
+        assert_eq!(
+            hands_and_bids[0].hand.cmp_1(&hands_and_bids[1].hand),
+            Ordering::Less,
+            "Check if {:?} < {:?}",
+            hands_and_bids[0],
+            hands_and_bids[1]
+        );
+        assert_eq!(
+            hands_and_bids[1].hand.cmp_1(&hands_and_bids[2].hand),
+            Ordering::Less,
+            "Check if {:?} < {:?}",
+            hands_and_bids[1],
+            hands_and_bids[2]
+        );
+        assert_eq!(
+            hands_and_bids[2].hand.cmp_1(&hands_and_bids[3].hand),
+            Ordering::Less,
+            "Check if {:?} < {:?}",
+            hands_and_bids[2],
+            hands_and_bids[3]
+        );
+        assert_eq!(
+            hands_and_bids[3].hand.cmp_1(&hands_and_bids[4].hand),
+            Ordering::Less,
+            "Check if {:?} < {:?}",
+            hands_and_bids[3],
+            hands_and_bids[4]
+        );
+    }
 }
 
 fn solve_part_1(hands_and_bids: Vec<HandAndBid>) -> Result<String> {

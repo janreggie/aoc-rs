@@ -34,30 +34,6 @@ fn combine(range_1: Range, range_2: Range) -> Option<Range> {
     }
 }
 
-#[test]
-fn test_combine() {
-    assert_eq!(
-        combine(Range { start: 1, length: 2 }, Range { start: 3, length: 8 }),
-        None,
-    );
-    assert_eq!(
-        combine(Range { start: 1, length: 3 }, Range { start: 3, length: 8 }),
-        Some(Range { start: 1, length: 10 })
-    );
-    assert_eq!(
-        combine(Range { start: 1, length: 5 }, Range { start: 3, length: 8 }),
-        Some(Range { start: 1, length: 10 })
-    );
-    assert_eq!(
-        combine(Range { start: 1, length: 16 }, Range { start: 3, length: 8 }),
-        Some(Range { start: 1, length: 16 })
-    );
-    assert_eq!(
-        combine(Range { start: 7, length: 3 }, Range { start: 8, length: 3 }),
-        Some(Range { start: 7, length: 4 })
-    );
-}
-
 fn merge_ranges(ranges: Vec<Range>) -> Vec<Range> {
     if ranges.len() <= 1 {
         return ranges;
@@ -80,20 +56,6 @@ fn merge_ranges(ranges: Vec<Range>) -> Vec<Range> {
     }
     result.push(current);
     result
-}
-
-#[test]
-fn test_merge_ranges() {
-    let ranges = vec![
-        Range { start: 1, length: 3 },
-        Range { start: 2, length: 4 },
-        Range { start: 7, length: 3 },
-        Range { start: 8, length: 3 },
-    ];
-    assert_eq!(
-        merge_ranges(ranges),
-        vec![Range { start: 1, length: 5 }, Range { start: 7, length: 4 }]
-    );
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -219,38 +181,6 @@ impl MapRow {
     }
 }
 
-#[test]
-fn test_map_row() {
-    let map_row = MapRow::new("50 98 2").unwrap();
-    assert_eq!(
-        map_row,
-        MapRow {
-            destination_range_start: 50,
-            source_range_start: 98,
-            range_length: 2
-        }
-    );
-    assert_eq!(map_row.source_to_dest(97), None);
-    assert_eq!(map_row.source_to_dest(98), Some(50));
-    assert_eq!(map_row.source_to_dest(99), Some(51));
-    assert_eq!(map_row.source_to_dest(100), None);
-
-    // source_range is from 97 to 100
-    let source_range = Range { start: 97, length: 4 };
-    assert_eq!(
-        map_row.feed_range(source_range),
-        vec![
-            MapRowMapping::Unmapped(Range { start: 97, length: 1 }),
-            MapRowMapping::Mapped(Range { start: 50, length: 2 }),
-            MapRowMapping::Unmapped(Range { start: 100, length: 1 }),
-        ]
-    );
-    assert_eq!(
-        map_row.feed_range(Range { start: 100, length: 2 }),
-        vec![MapRowMapping::Unmapped(Range { start: 100, length: 2 })]
-    )
-}
-
 struct Map {
     rows: Vec<MapRow>,
 }
@@ -306,28 +236,6 @@ impl Map {
             .map(|range| self.feed_range(range))
             .flatten()
             .collect()
-    }
-}
-
-#[test]
-fn test_map() {
-    let map =
-        Map::new(&vec!["50 98 2".to_string(), "52 50 48".to_string()]).unwrap();
-    let expects = [
-        (0, 0),
-        (1, 1),
-        (48, 48),
-        (49, 49),
-        (50, 52),
-        (51, 53),
-        (96, 98),
-        (97, 99),
-        (98, 50),
-        (99, 51),
-        (100, 100),
-    ];
-    for (source, dest) in expects {
-        assert_eq!(map.source_to_dest_or_same(source), dest)
     }
 }
 
@@ -437,6 +345,119 @@ impl Almanac {
         let humidity_ranges =
             self.temperature_to_humidity.feed_ranges(temperature_ranges);
         self.humidity_to_location.feed_ranges(humidity_ranges)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_combine() {
+        assert_eq!(
+            combine(
+                Range { start: 1, length: 2 },
+                Range { start: 3, length: 8 }
+            ),
+            None,
+        );
+        assert_eq!(
+            combine(
+                Range { start: 1, length: 3 },
+                Range { start: 3, length: 8 }
+            ),
+            Some(Range { start: 1, length: 10 })
+        );
+        assert_eq!(
+            combine(
+                Range { start: 1, length: 5 },
+                Range { start: 3, length: 8 }
+            ),
+            Some(Range { start: 1, length: 10 })
+        );
+        assert_eq!(
+            combine(
+                Range { start: 1, length: 16 },
+                Range { start: 3, length: 8 }
+            ),
+            Some(Range { start: 1, length: 16 })
+        );
+        assert_eq!(
+            combine(
+                Range { start: 7, length: 3 },
+                Range { start: 8, length: 3 }
+            ),
+            Some(Range { start: 7, length: 4 })
+        );
+    }
+
+    #[test]
+    fn test_merge_ranges() {
+        let ranges = vec![
+            Range { start: 1, length: 3 },
+            Range { start: 2, length: 4 },
+            Range { start: 7, length: 3 },
+            Range { start: 8, length: 3 },
+        ];
+        assert_eq!(
+            merge_ranges(ranges),
+            vec![Range { start: 1, length: 5 }, Range { start: 7, length: 4 }]
+        );
+    }
+
+    #[test]
+    fn test_map_row() {
+        let map_row = MapRow::new("50 98 2").unwrap();
+        assert_eq!(
+            map_row,
+            MapRow {
+                destination_range_start: 50,
+                source_range_start: 98,
+                range_length: 2
+            }
+        );
+        assert_eq!(map_row.source_to_dest(97), None);
+        assert_eq!(map_row.source_to_dest(98), Some(50));
+        assert_eq!(map_row.source_to_dest(99), Some(51));
+        assert_eq!(map_row.source_to_dest(100), None);
+
+        // source_range is from 97 to 100
+        let source_range = Range { start: 97, length: 4 };
+        assert_eq!(
+            map_row.feed_range(source_range),
+            vec![
+                MapRowMapping::Unmapped(Range { start: 97, length: 1 }),
+                MapRowMapping::Mapped(Range { start: 50, length: 2 }),
+                MapRowMapping::Unmapped(Range { start: 100, length: 1 }),
+            ]
+        );
+        assert_eq!(
+            map_row.feed_range(Range { start: 100, length: 2 }),
+            vec![MapRowMapping::Unmapped(Range { start: 100, length: 2 })]
+        )
+    }
+
+    #[test]
+    fn test_map() {
+        let map =
+            Map::new(&vec!["50 98 2".to_string(), "52 50 48".to_string()])
+                .unwrap();
+        let expects = [
+            (0, 0),
+            (1, 1),
+            (48, 48),
+            (49, 49),
+            (50, 52),
+            (51, 53),
+            (96, 98),
+            (97, 99),
+            (98, 50),
+            (99, 51),
+            (100, 100),
+        ];
+        for (source, dest) in expects {
+            assert_eq!(map.source_to_dest_or_same(source), dest)
+        }
     }
 }
 
