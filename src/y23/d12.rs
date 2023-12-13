@@ -1,10 +1,8 @@
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 
-use anyhow::{bail, Context, Result};
-use async_recursion::async_recursion;
-use futures::executor::block_on;
+use anyhow::{Context, Result};
 
-#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 enum Condition {
     Operational,
     Damaged,
@@ -37,6 +35,18 @@ impl Display for Condition {
     }
 }
 
+impl Debug for Condition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let c = match self {
+            Condition::Operational => '.',
+            Condition::Damaged => '#',
+            Condition::Unknown => '?',
+        };
+        write!(f, "{}", c)
+    }
+}
+
+#[derive(Debug)]
 struct Springs {
     condition_records: Vec<Condition>,
     damaged_groups: Vec<usize>,
@@ -73,9 +83,14 @@ impl Springs {
     }
 
     // Counts how many possible arrangements are there given condition_records
-    fn count_arrangements(&self) -> u32 {
-        Self::count_arrangements_iter(
-            &self.condition_records,
+    fn count_arrangements(&self) -> u64 {
+        let condition_record_groups = &self
+            .condition_records
+            .split(|c| *c == Condition::Operational)
+            .filter(|g| !g.is_empty())
+            .collect::<Vec<_>>();
+        Self::count_arrangements_iter_grouped(
+            &condition_record_groups,
             &self.damaged_groups,
         )
     }
@@ -96,10 +111,49 @@ impl Springs {
         format!("{} {}", condition_records, damaged_groups)
     }
 
+    fn count_arrangements_iter_grouped(
+        condition_record_groups: &[&[Condition]],
+        damaged_groups: &[usize],
+    ) -> u64 {
+        if condition_record_groups.len() == 1 {
+            return Self::count_arrangements_iter(
+                condition_record_groups[0],
+                damaged_groups,
+            );
+        }
+
+        let (first_condition_records, remaining_condition_record_groups) =
+            condition_record_groups.split_first().unwrap();
+        let mut result = 0;
+        for ii in 0..=damaged_groups.len() {
+            let (damaged_groups_at_first, damaged_groups_at_rest) =
+                damaged_groups.split_at(ii);
+            let lower_bound = damaged_groups_at_first.iter().sum::<usize>()
+                + damaged_groups_at_first.len();
+            if lower_bound > first_condition_records.len() + 1 {
+                break;
+            }
+            let first_condition_records_arrangements =
+                Self::count_arrangements_iter(
+                    first_condition_records,
+                    damaged_groups_at_first,
+                );
+            if first_condition_records_arrangements == 0 {
+                continue;
+            }
+            result += first_condition_records_arrangements
+                * Self::count_arrangements_iter_grouped(
+                    remaining_condition_record_groups,
+                    damaged_groups_at_rest,
+                );
+        }
+        result
+    }
+
     fn count_arrangements_iter(
         condition_records: &[Condition],
         damaged_groups: &[usize],
-    ) -> u32 {
+    ) -> u64 {
         // Base case when there are zero damaged groups
         if damaged_groups.len() == 0 {
             for cc in condition_records {
@@ -121,6 +175,47 @@ impl Springs {
             < (damaged_groups.iter().sum::<usize>() + damaged_groups.len() - 1)
         {
             return 0;
+        }
+
+        // TODO: Optimize: if ends with #
+        if condition_records.ends_with(&[Condition::Damaged]) {
+            let (&last_damaged_group, rest_damaged_groups) =
+                damaged_groups.split_last().unwrap();
+            if condition_records[condition_records.len() - last_damaged_group..]
+                .iter()
+                .any(|f| *f == Condition::Operational)
+            {
+                return 0;
+            }
+            if condition_records.len() > last_damaged_group
+                && condition_records
+                    [condition_records.len() - last_damaged_group - 1]
+                    == Condition::Damaged
+            {
+                return 0;
+            }
+            let next_condition_records =
+                if condition_records.len() == last_damaged_group {
+                    &condition_records
+                        [..condition_records.len() - last_damaged_group]
+                } else {
+                    &condition_records
+                        [..condition_records.len() - last_damaged_group - 1]
+                };
+            return Self::count_arrangements_iter(
+                next_condition_records,
+                rest_damaged_groups,
+            );
+        }
+
+        // TODO: Do some optimizations here... e.g., "if they're all ???'s"
+        if condition_records.iter().all(|c| *c == Condition::Unknown) {
+            let mut damaged_groups = damaged_groups.to_vec();
+            damaged_groups.sort_by(|a, b| b.cmp(a));
+            return Self::count_arrangements_iter_if_all_unknowns(
+                condition_records,
+                &damaged_groups,
+            );
         }
 
         // Check the first condition_record
@@ -149,10 +244,34 @@ impl Springs {
         }
     }
 
+    fn count_arrangements_iter_if_all_unknowns(
+        condition_records: &[Condition],
+        damaged_groups: &[usize],
+    ) -> u64 {
+        // Copyright (c) Stack Overflow, CC-BY-SA 4.0
+        // <https://stackoverflow.com/a/65563202/14020202>
+        fn count_combinations(n: u64, r: u64) -> u64 {
+            if r > n {
+                0
+            } else {
+                (1..=r.min(n - r)).fold(1, |acc, val| acc * (n - val + 1) / val)
+            }
+        }
+        // Count how many Unknowns there would be left, minus considering all damaged groups.
+        let damaged_count = damaged_groups.iter().sum::<usize>();
+        // Then count how many ways are there to divvy the remaining Unknowns (which will be Operationals) to fit the continguous groups.
+        let remaining_unknowns = condition_records.len() - damaged_count;
+        count_combinations(
+            remaining_unknowns as u64 + 1,
+            damaged_groups.len() as u64,
+        )
+        // }
+    }
+
     fn count_arrangements_iter_if_first_is_damaged(
         condition_records: &[Condition],
         damaged_groups: &[usize],
-    ) -> u32 {
+    ) -> u64 {
         // Check if it's possible to have the first damaged_groups[0] elements equal to something
         let first_damaged_group = damaged_groups[0];
         if condition_records.len() < first_damaged_group {
@@ -184,17 +303,34 @@ impl Springs {
 
 #[test]
 fn test_spring_counts() {
-    let all_springs = vec![
-        Springs::new("???.### 1,1,3").unwrap(),
-        Springs::new(".??..??...?##. 1,1,3").unwrap(),
-        Springs::new("?#?#?#?#?#?#?#? 1,3,1,6").unwrap(),
-        Springs::new("????.#...#... 4,1,1").unwrap(),
-        Springs::new("????.######..#####. 1,6,5").unwrap(),
-        Springs::new("?###???????? 3,2,1").unwrap(),
+    let cases = vec![
+        ("???.### 1,1,3", 1),
+        (".??..??...?##. 1,1,3", 4),
+        ("?#?#?#?#?#?#?#? 1,3,1,6", 1),
+        ("????.#...#... 4,1,1", 1),
+        ("????.######..#####. 1,6,5", 4),
+        ("?###???????? 3,2,1", 10),
     ];
-    let counts = vec![1, 4, 1, 1, 4, 10];
-    for ii in 0..all_springs.len() {
-        assert_eq!(all_springs[ii].count_arrangements(), counts[ii])
+    let cases = cases.into_iter().map(|(s, c)| (Springs::new(s).unwrap(), c));
+    for (springs, count) in cases {
+        println!("{:?} must have {:?} arrangements", &springs, count);
+        assert_eq!(springs.count_arrangements(), count)
+    }
+}
+
+#[test]
+fn test_spring_counts_all_unknowns() {
+    let cases = vec![
+        ("? 1", 1),
+        ("??? 1", 3),
+        ("?????? 2", 5),
+        ("?????? 1,1", 10),
+        ("?????? 1,2", 6),
+    ];
+    let cases = cases.into_iter().map(|(s, c)| (Springs::new(s).unwrap(), c));
+    for (springs, count) in cases {
+        println!("{:?} must have {:?} arrangements", &springs, count);
+        assert_eq!(springs.count_arrangements(), count)
     }
 }
 
@@ -216,11 +352,20 @@ fn test_spring_counts_unfolded() {
 }
 
 fn solve_part_1(all_springs: &Vec<Springs>) -> Result<String> {
-    Ok(all_springs
-        .iter()
-        .map(|springs| springs.count_arrangements())
-        .sum::<u32>()
-        .to_string())
+    let mut result = 0;
+    for springs in all_springs {
+        let current_count = springs.count_arrangements();
+        println!(
+            "{} {}",
+            Springs::pretty_print_condition_records_and_damaged_groups(
+                &springs.condition_records,
+                &springs.damaged_groups
+            ),
+            current_count
+        );
+        result += current_count;
+    }
+    Ok(result.to_string())
 }
 
 fn solve_part_2(all_springs: Vec<Springs>) -> Result<String> {
