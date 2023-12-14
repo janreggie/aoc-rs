@@ -1,8 +1,9 @@
 use std::fmt::{Debug, Display};
 
 use anyhow::{Context, Result};
+use mini_moka::sync::Cache;
 
-#[derive(PartialEq, Eq, Clone, Copy)]
+#[derive(PartialEq, Eq, Clone, Copy, Hash)]
 enum Condition {
     Operational,
     Damaged,
@@ -50,6 +51,8 @@ impl Debug for Condition {
 struct Springs {
     condition_records: Vec<Condition>,
     damaged_groups: Vec<usize>,
+    // Cache key: ((i1,i2), (j1,j2)) such that it holds answer for condition_records[i1..i2] and damaged_groups[j1..j2].
+    cache: Cache<((usize, usize), (usize, usize)), u64>,
 }
 
 impl Springs {
@@ -65,7 +68,11 @@ impl Springs {
             .map(|n| n.parse::<usize>().ok())
             .collect::<Option<Vec<_>>>()?;
 
-        Some(Springs { condition_records, damaged_groups })
+        Some(Springs {
+            condition_records,
+            damaged_groups,
+            cache: Cache::new(10_000),
+        })
     }
 
     fn unfold(&mut self) {
@@ -82,6 +89,22 @@ impl Springs {
         }
     }
 
+    /// Returns indexes (i1,i2)  for condition records such that condition_records[i1..i2] is continguous without any dots.
+    fn get_condition_record_group_indexes(&self) -> Vec<(usize, usize)> {
+        let condition_records_with_original_indexes = &self
+            .condition_records
+            .iter()
+            .enumerate()
+            .collect::<Vec<(usize, &Condition)>>();
+        let condition_record_groups = condition_records_with_original_indexes
+            .split(|(_, c)| **c == Condition::Operational)
+            .filter(|g| !g.is_empty());
+        let indexes = condition_record_groups.map(|group| {
+            (group.first().unwrap().0, group.last().unwrap().0 + 1)
+        });
+        indexes.collect()
+    }
+
     // Counts how many possible arrangements are there given condition_records
     fn count_arrangements(&self) -> u64 {
         let condition_record_groups = &self
@@ -89,7 +112,7 @@ impl Springs {
             .split(|c| *c == Condition::Operational)
             .filter(|g| !g.is_empty())
             .collect::<Vec<_>>();
-        Self::count_arrangements_iter_grouped(
+        self.count_arrangements_iter_grouped(
             &condition_record_groups,
             &self.damaged_groups,
         )
@@ -112,11 +135,12 @@ impl Springs {
     }
 
     fn count_arrangements_iter_grouped(
+        &self,
         condition_record_groups: &[&[Condition]],
         damaged_groups: &[usize],
     ) -> u64 {
         if condition_record_groups.len() == 1 {
-            return Self::count_arrangements_iter(
+            return self.count_arrangements_iter(
                 condition_record_groups[0],
                 damaged_groups,
             );
@@ -133,8 +157,8 @@ impl Springs {
             if lower_bound > first_condition_records.len() + 1 {
                 break;
             }
-            let first_condition_records_arrangements =
-                Self::count_arrangements_iter(
+            let first_condition_records_arrangements = self
+                .count_arrangements_iter(
                     first_condition_records,
                     damaged_groups_at_first,
                 );
@@ -142,7 +166,7 @@ impl Springs {
                 continue;
             }
             result += first_condition_records_arrangements
-                * Self::count_arrangements_iter_grouped(
+                * self.count_arrangements_iter_grouped(
                     remaining_condition_record_groups,
                     damaged_groups_at_rest,
                 );
@@ -151,6 +175,7 @@ impl Springs {
     }
 
     fn count_arrangements_iter(
+        &self,
         condition_records: &[Condition],
         damaged_groups: &[usize],
     ) -> u64 {
@@ -202,7 +227,7 @@ impl Springs {
                     &condition_records
                         [..condition_records.len() - last_damaged_group - 1]
                 };
-            return Self::count_arrangements_iter(
+            return self.count_arrangements_iter(
                 next_condition_records,
                 rest_damaged_groups,
             );
@@ -212,7 +237,7 @@ impl Springs {
         if condition_records.iter().all(|c| *c == Condition::Unknown) {
             let mut damaged_groups = damaged_groups.to_vec();
             damaged_groups.sort_by(|a, b| b.cmp(a));
-            return Self::count_arrangements_iter_if_all_unknowns(
+            return self.count_arrangements_iter_if_all_unknowns(
                 condition_records,
                 &damaged_groups,
             );
@@ -220,22 +245,21 @@ impl Springs {
 
         // Check the first condition_record
         match condition_records[0] {
-            Condition::Operational => Self::count_arrangements_iter(
+            Condition::Operational => self.count_arrangements_iter(
                 &condition_records[1..],
                 damaged_groups,
             ),
-            Condition::Damaged => {
-                Self::count_arrangements_iter_if_first_is_damaged(
+            Condition::Damaged => self
+                .count_arrangements_iter_if_first_is_damaged(
                     condition_records,
                     damaged_groups,
-                )
-            }
+                ),
             Condition::Unknown => {
-                let f1 = Self::count_arrangements_iter(
+                let f1 = self.count_arrangements_iter(
                     &condition_records[1..],
                     damaged_groups,
                 );
-                let f2 = Self::count_arrangements_iter_if_first_is_damaged(
+                let f2 = self.count_arrangements_iter_if_first_is_damaged(
                     condition_records,
                     damaged_groups,
                 );
@@ -245,6 +269,7 @@ impl Springs {
     }
 
     fn count_arrangements_iter_if_all_unknowns(
+        &self,
         condition_records: &[Condition],
         damaged_groups: &[usize],
     ) -> u64 {
@@ -268,6 +293,7 @@ impl Springs {
     }
 
     fn count_arrangements_iter_if_first_is_damaged(
+        &self,
         condition_records: &[Condition],
         damaged_groups: &[usize],
     ) -> u64 {
@@ -293,7 +319,7 @@ impl Springs {
             } else {
                 &condition_records[first_damaged_group + 1..]
             };
-        Self::count_arrangements_iter(
+        self.count_arrangements_iter(
             next_condition_records,
             &damaged_groups[1..],
         )
