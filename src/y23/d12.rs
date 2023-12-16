@@ -1,7 +1,6 @@
 use std::fmt::{Debug, Display};
 
 use anyhow::{Context, Result};
-use mini_moka::sync::Cache;
 
 #[derive(PartialEq, Eq, Clone, Copy, Hash)]
 enum Condition {
@@ -51,8 +50,6 @@ impl Debug for Condition {
 struct Springs {
     condition_records: Vec<Condition>,
     damaged_groups: Vec<usize>,
-    // Cache key: ((i1,i2), (j1,j2)) such that it holds answer for condition_records[i1..i2] and damaged_groups[j1..j2].
-    cache: Cache<((usize, usize), (usize, usize)), u64>,
 }
 
 impl Springs {
@@ -68,11 +65,7 @@ impl Springs {
             .map(|n| n.parse::<usize>().ok())
             .collect::<Option<Vec<_>>>()?;
 
-        Some(Springs {
-            condition_records,
-            damaged_groups,
-            cache: Cache::new(10_000),
-        })
+        Some(Springs { condition_records, damaged_groups })
     }
 
     fn unfold(&mut self) {
@@ -87,22 +80,6 @@ impl Springs {
         for _ in 0..4 {
             self.damaged_groups.extend_from_within(0..old_damaged_groups_len);
         }
-    }
-
-    /// Returns indexes (i1,i2)  for condition records such that condition_records[i1..i2] is continguous without any dots.
-    fn get_condition_record_group_indexes(&self) -> Vec<(usize, usize)> {
-        let condition_records_with_original_indexes = &self
-            .condition_records
-            .iter()
-            .enumerate()
-            .collect::<Vec<(usize, &Condition)>>();
-        let condition_record_groups = condition_records_with_original_indexes
-            .split(|(_, c)| **c == Condition::Operational)
-            .filter(|g| !g.is_empty());
-        let indexes = condition_record_groups.map(|group| {
-            (group.first().unwrap().0, group.last().unwrap().0 + 1)
-        });
-        indexes.collect()
     }
 
     // Counts how many possible arrangements are there given condition_records
