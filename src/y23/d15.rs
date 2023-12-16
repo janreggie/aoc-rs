@@ -108,7 +108,7 @@ impl Boxes {
                     current_box.remove(ii);
                 }
             }
-            Operation::Equals(focal_length) => {
+            Operation::Equals(_) => {
                 let new_lens = Lens::from(step).unwrap();
                 for ii in 0..current_box.len() {
                     if current_box[ii].label == new_lens.label {
