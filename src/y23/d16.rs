@@ -220,11 +220,6 @@ impl Layout {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-}
-
 fn solve_part_1(layout: &Layout) -> Result<String> {
     let first_step = Step { pos: (0, 0), direction: Direction::East };
     Ok(layout.count_energized_from(first_step).to_string())
