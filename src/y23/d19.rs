@@ -1,12 +1,8 @@
 use anyhow::{bail, Context};
-use itertools::{Group, Groups};
 use sscanf::{sscanf, FromScanf};
 use std::{
-    collections::{HashMap, HashSet, VecDeque},
-    fmt,
-    hash::BuildHasher,
+    collections::{HashMap, VecDeque},
     str::FromStr,
-    thread::current,
 };
 
 use crate::util::vectors::group;
