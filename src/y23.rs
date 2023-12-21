@@ -17,6 +17,7 @@ mod d14;
 mod d15;
 mod d16;
 mod d19;
+mod d21;
 
 pub fn solver(
     day: u8,
@@ -39,6 +40,7 @@ pub fn solver(
         15 => d15::solve,
         16 => d16::solve,
         19 => d19::solve,
+        21 => d21::solve,
         _ => todo!("day {}", day),
     }
 }
