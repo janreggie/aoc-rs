@@ -1,9 +1,5 @@
 use anyhow::{bail, Context, Ok, Result};
-use sscanf::{sscanf, FromScanf};
-use std::{
-    collections::{HashMap, VecDeque},
-    str::FromStr,
-};
+use std::collections::VecDeque;
 
 use crate::util::vectors::Grid;
 
